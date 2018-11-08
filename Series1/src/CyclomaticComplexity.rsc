@@ -8,10 +8,14 @@ public int calculateMethodComplexity(Statement statement){
 }
 
 test bool emptyMethodScoresOne(){
-    success = true;
     emptyClass = |project://CodeToTest/src/testCode/EmptyClass.java|;
     expectedComplexity = 1;
-	for(/method(_, _, _, _, Statement impl) := createAstsFromEclipseProject(emptyClass, true)){
+    return complexityForLocation(emptyClass, expectedComplexity);
+}
+
+bool complexityForLocation(loc location, int expectedComplexity){
+    success = true;
+	for(/method(_, _, _, _, Statement impl) := createAstsFromEclipseProject(location, true)){
 	  success = success && (expectedComplexity == calculateMethodComplexity(impl));
 	}
 	return success;
