@@ -54,5 +54,9 @@ test bool MultiLineCommentsAfterTextCountsline() {
 	return linesOfCode(fileWithMultiLine) == 4;
 }
 
+test bool MultiLineCommentsEndsBeforeTextCountsline() {
+    fileWithMultiLine = |project://CodeToTest/src/testCode/LinesOfCodeTests/MultiCommentLineTextEndsBefore.java|;
+	return linesOfCode(fileWithMultiLine) == 4;
+}
 
 

@@ -12,8 +12,11 @@ public int singleComment(list[str] fred){
 	count = 0;
 	inMultiLineComment = false;
 	for(str s <- fred){
-		if (startsWith(trim(s),"/*")) {
+		if (findFirst(trim(s),"/*") != -1) {
 		    inMultiLineComment = true;
+		    if(!startsWith(trim(s),"/*") ){
+		    	count -= 1;
+		    }
 		}
 		
 		if(inMultiLineComment){
