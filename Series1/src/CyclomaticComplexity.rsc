@@ -13,6 +13,14 @@ test bool emptyMethodScoresOne(){
     return complexityForLocation(emptyClass, expectedComplexity);
 }
 
+test bool noComplexityMethodScoresOne(){
+    noComplexityClass = |project://CodeToTest/src/testCode/NoComplexityClass.java|;
+    expectedComplexity = 1;
+    return complexityForLocation(noComplexityClass, expectedComplexity);
+}
+
+
+
 bool complexityForLocation(loc location, int expectedComplexity){
     success = true;
 	for(/method(_, _, _, _, Statement impl) := createAstsFromEclipseProject(location, true)){
