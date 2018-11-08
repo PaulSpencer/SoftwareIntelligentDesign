@@ -4,6 +4,8 @@ import CyclomaticComplexity;
 
 import lang::java::jdt::m3::AST;
 import Set;
+import Relation;
+import IO;
 
 test bool emptyMethodScoresOne(){
     emptyClass = |project://CodeToTest/src/testCode/EmptyClass.java|;
@@ -33,6 +35,13 @@ test bool classWithConstructorIncludesConstructor(){
     classWithConstructor = |project://CodeToTest/src/testCode/ClassWithConstructor.java|;
     result = calculateComplexity(classWithConstructor);
     return size(result) == 1;
+}
+
+test bool methodWithIfScoresTwo(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithSingleComplexity.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithSingleComplexity/ifMethod()|,2>;
+	return expectedValue in result;
 }
 
 bool complexityForLocation(loc location, int expectedComplexity){
