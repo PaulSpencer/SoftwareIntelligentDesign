@@ -51,6 +51,13 @@ test bool methodWithIfElseScoresTwo(){
 	return expectedValue in result;
 }
 
+test bool methodWithconditionalScoresTwo(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/conditionalMethod()|,2>;
+	return expectedValue in result;
+}
+
 
 bool complexityForLocation(loc location, int expectedComplexity){
     success = true;

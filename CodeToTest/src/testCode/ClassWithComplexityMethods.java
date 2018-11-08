@@ -17,4 +17,9 @@ public class ClassWithComplexityMethods {
 		}
 	}
 	
+	public void conditionalMethod() {
+		bool condition = false;
+	    String temp2 = condition ? "trueChoice" : "falseChoice";
+	}
+	
 }
