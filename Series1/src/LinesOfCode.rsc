@@ -10,13 +10,25 @@ public int linesOfCode(loc location){
 
 public int singleComment(list[str] fred){
 	count = 0;
+	inMultiLineComment = false;
 	for(str s <- fred){
+		if (startsWith(trim(s),"/*")) {
+		    inMultiLineComment = true;
+		}
+		
+		if(inMultiLineComment){
+		   count +=1;
+		} 
 		if(startsWith(trim(s),"//") ){
 			count +=1;
 		}
 		if(trim(s) == ""){
 			count +=1;
 		} 
+		
+		if(endsWith(trim(s),"*/")) {
+		    inMultiLineComment = false;
+		}
 	}
 	return count;
 }
