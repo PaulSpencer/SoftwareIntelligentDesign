@@ -1,5 +1,8 @@
 module LinesOfCode
 
+import List;
+import IO;
+
 public int linesOfCode(loc location){
-	return 3;
+	return size(readFileLines(location));
 }
