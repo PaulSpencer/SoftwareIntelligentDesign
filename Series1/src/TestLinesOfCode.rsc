@@ -40,12 +40,19 @@ test bool MultiLineCommentsNotCounted() {
 }
 
 test bool commentsInMultiLineCommentsNotCountedTwice() {
-    fileWithBlankLines = |project://CodeToTest/src/testCode/LinesOfCodeTests/MultiCommentLine2.java|;
-	return linesOfCode(fileWithBlankLines) == 4;
+    fileWithMultiLine = |project://CodeToTest/src/testCode/LinesOfCodeTests/MultiCommentLine2.java|;
+	return linesOfCode(fileWithMultiLine) == 4;
 }
 
 test bool blankLinesInMultiLineCommentsNotCountedTwice() {
-    fileWithBlankLines = |project://CodeToTest/src/testCode/LinesOfCodeTests/BlankLinesInMultiCommentLine.java|;
-	return linesOfCode(fileWithBlankLines) == 4;
+    fileWithMultiLine = |project://CodeToTest/src/testCode/LinesOfCodeTests/BlankLinesInMultiCommentLine.java|;
+	return linesOfCode(fileWithMultiLine) == 4;
 }
+
+test bool MultiLineCommentsAfterTextCountsline() {
+    fileWithMultiLine = |project://CodeToTest/src/testCode/LinesOfCodeTests/MultiCommentLineTextBefore.java|;
+	return linesOfCode(fileWithMultiLine) == 4;
+}
+
+
 
