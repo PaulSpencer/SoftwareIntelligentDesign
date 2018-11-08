@@ -13,6 +13,9 @@ public int singleComment(list[str] fred){
 	for(str s <- fred){
 		if(startsWith(trim(s),"//") ){
 			count +=1;
+		}
+		if(trim(s) == ""){
+			count +=1;
 		} 
 	}
 	return count;

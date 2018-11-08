@@ -33,3 +33,9 @@ test bool blankLinesNotCounted() {
 	return linesOfCode(fileWithBlankLines) == 5;
 
 }
+
+test bool MultiLineCommentsNotCounted() {
+    fileWithBlankLines = |project://CodeToTest/src/testCode/LinesOfCodeTests/MultiCommentLine.java|;
+	return linesOfCode(fileWithBlankLines) == 4;
+
+}
