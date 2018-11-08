@@ -43,6 +43,13 @@ public class ClassWithComplexityMethods {
         }
 	}	
 	
+	public void forNoConditionMethod() {
+        int count = 1;
+        for ( ; ; ) {
+            count++;
+        }
+	}	
+		
 	public void forEachMethod() {
 		String[] fruits = new String[] { "Orange", "Apple", "Pear", "Strawberry" };
 		for (String fruit : fruits) {

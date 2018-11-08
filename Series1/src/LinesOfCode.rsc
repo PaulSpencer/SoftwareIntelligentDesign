@@ -30,8 +30,11 @@ public int singleComment(list[str] fred){
 			} 
 		}
 		
-		if(endsWith(trim(s),"*/")) {
+		if(findFirst(trim(s),"*/") != -1) {
 		    inMultiLineComment = false;
+		    if (!endsWith(trim(s),"*/")) {
+	          count -=1;      
+		    }
 		}
 	}
 	return count;

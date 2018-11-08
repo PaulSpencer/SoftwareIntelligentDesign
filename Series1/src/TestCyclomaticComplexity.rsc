@@ -79,12 +79,21 @@ test bool methodWithForScoresTwo(){
 	return expectedValue in result;
 }
 
+
+test bool methodWithConditionalessForScoresTwo(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/forNoConditionMethod()|,2>;
+	return expectedValue in result;
+}
+
 test bool methodWithForEachScoresTwo(){
 	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
 	result = calculateComplexity(classWithIf);
 	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/forEachMethod()|,2>;
 	return expectedValue in result;
 }
+
 
 
 bool complexityForLocation(loc location, int expectedComplexity){
