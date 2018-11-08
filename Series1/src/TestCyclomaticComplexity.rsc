@@ -51,10 +51,38 @@ test bool methodWithIfElseScoresTwo(){
 	return expectedValue in result;
 }
 
-test bool methodWithconditionalScoresTwo(){
+test bool methodWithConditionalScoresTwo(){
 	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
 	result = calculateComplexity(classWithIf);
 	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/conditionalMethod()|,2>;
+	return expectedValue in result;
+}
+
+test bool methodWithWhileScoresTwo(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/whileMethod()|,2>;
+	return expectedValue in result;
+}
+
+test bool methodWithDoWhileScoresTwo(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/doWhileMethod()|,2>;
+	return expectedValue in result;
+}
+
+test bool methodWithForScoresTwo(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/forMethod()|,2>;
+	return expectedValue in result;
+}
+
+test bool methodWithForEachScoresTwo(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/forEachMethod()|,2>;
 	return expectedValue in result;
 }
 

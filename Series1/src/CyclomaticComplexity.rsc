@@ -20,6 +20,10 @@ public int calculateMethodComplexity(Statement statement){
     	case \if(_,_) : complexity += 1;
     	case \if(_,_,_) : complexity += 1;
     	case \conditional(_,_,_) : complexity += 1;
+    	case \while(_,_) : complexity += 1;
+    	case \for(_,_,_,_) : complexity += 1;
+    	case \foreach(_,_,_) : complexity += 1;
+    	case \do(_,_) : complexity += 1;
     }
     return complexity;
 }
