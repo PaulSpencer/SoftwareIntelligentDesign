@@ -14,19 +14,22 @@ test bool onlyCodeReturnsTenLines(){
 }
 
 test bool singleSingleCommentLineReturnsOneLessLine(){
-    fileWithJustCode = |project://CodeToTest/src/testCode/LinesOfCodeTests/SingleCommentLine.java|;
-	return linesOfCode(fileWithJustCode) == 4;
+    fileWithSingleLineComment = |project://CodeToTest/src/testCode/LinesOfCodeTests/SingleCommentLine.java|;
+	return linesOfCode(fileWithSingleLineComment) == 4;
 }
 
 test bool singleSingleCommentLineReturnsOneLessLine2(){
-    fileWithJustCode = |project://CodeToTest/src/testCode/LinesOfCodeTests/SingleCommentLine2.java|;
-	return linesOfCode(fileWithJustCode) == 4;
+    fileWithSingleLineComment = |project://CodeToTest/src/testCode/LinesOfCodeTests/SingleCommentLine2.java|;
+	return linesOfCode(fileWithSingleLineComment) == 4;
 }
 
 test bool endOfLineCommentDoesNotEffectCount() {
-    fileWithJustCode = |project://CodeToTest/src/testCode/LinesOfCodeTests/SingleLineCommentEndOfLine.java|;
-	println("aaarrrgghhh!!!!");
-	println(linesOfCode(fileWithJustCode) );
-	println();
-	return linesOfCode(fileWithJustCode) == 4;
+    fileWithSingleLineComment = |project://CodeToTest/src/testCode/LinesOfCodeTests/SingleLineCommentEndOfLine.java|;
+	return linesOfCode(fileWithSingleLineComment) == 4;
+}
+
+test bool blankLinesNotCounted() {
+    fileWithBlankLines = |project://CodeToTest/src/testCode/LinesOfCodeTests/WithBlankLines.java|;
+	return linesOfCode(fileWithBlankLines) == 5;
+
 }
