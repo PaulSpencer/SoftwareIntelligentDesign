@@ -43,3 +43,9 @@ test bool commentsInMultiLineCommentsNotCountedTwice() {
     fileWithBlankLines = |project://CodeToTest/src/testCode/LinesOfCodeTests/MultiCommentLine2.java|;
 	return linesOfCode(fileWithBlankLines) == 4;
 }
+
+test bool blankLinesInMultiLineCommentsNotCountedTwice() {
+    fileWithBlankLines = |project://CodeToTest/src/testCode/LinesOfCodeTests/BlankLinesInMultiCommentLine.java|;
+	return linesOfCode(fileWithBlankLines) == 4;
+}
+
