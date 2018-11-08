@@ -38,11 +38,12 @@ test bool classWithConstructorIncludesConstructor(){
 }
 
 test bool methodWithIfScoresTwo(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithSingleComplexity.java|;
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
 	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithSingleComplexity/ifMethod()|,2>;
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/ifMethod()|,2>;
 	return expectedValue in result;
 }
+
 
 bool complexityForLocation(loc location, int expectedComplexity){
     success = true;
