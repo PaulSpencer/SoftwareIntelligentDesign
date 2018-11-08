@@ -11,9 +11,9 @@ public int linesOfCode(loc location){
 public int singleComment(list[str] fred){
 	count = 0;
 	for(str s <- fred){
-		if(startsWith(s,"\t//")){
+		if(/\w*\/\// := s){
 			count +=1;
-		}
+		} 
 	}
 	return count;
 }

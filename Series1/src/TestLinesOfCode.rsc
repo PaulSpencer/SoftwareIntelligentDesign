@@ -15,13 +15,18 @@ test bool onlyCodeReturnsTenLines(){
 
 test bool singleSingleCommentLineReturnsOneLessLine(){
     fileWithJustCode = |project://CodeToTest/src/testCode/LinesOfCodeTests/SingleCommentLine.java|;
-	println(linesOfCode(fileWithJustCode));
 	return linesOfCode(fileWithJustCode) == 4;
 }
 
-
 test bool singleSingleCommentLineReturnsOneLessLine2(){
     fileWithJustCode = |project://CodeToTest/src/testCode/LinesOfCodeTests/SingleCommentLine2.java|;
-	println(linesOfCode(fileWithJustCode));
+	return linesOfCode(fileWithJustCode) == 4;
+}
+
+test bool endOfLineCommentDoesNotEffectCount() {
+    fileWithJustCode = |project://CodeToTest/src/testCode/LinesOfCodeTests/SingleLineCommentEndOfLine.java|;
+	println("aaarrrgghhh!!!!");
+	println(linesOfCode(fileWithJustCode) );
+	println();
 	return linesOfCode(fileWithJustCode) == 4;
 }
