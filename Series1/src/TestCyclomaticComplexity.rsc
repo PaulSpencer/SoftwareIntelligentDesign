@@ -115,6 +115,13 @@ test bool methodWithCaseScoresOnePerCase3(){
 	return expectedValue in result;
 }
 
+test bool methodWithCaseWithOnePerCasePlusDefault(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/defaultCaseMethod()|,3>;
+	return expectedValue in result;
+}
+
 
 
 

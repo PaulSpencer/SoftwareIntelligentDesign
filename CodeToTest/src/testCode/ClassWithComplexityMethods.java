@@ -57,6 +57,7 @@ public class ClassWithComplexityMethods {
 		      break;
 		}
 	}
+	
 	public void twoCaseMethod() {
 		int temp = 1;
 		switch(temp) {
@@ -76,6 +77,16 @@ public class ClassWithComplexityMethods {
 			      break;
 		   case 3 :
 			      break;
+		}
+	}
+
+	public void defaultCaseMethod() {
+		int temp = 1;
+		switch(temp) {
+		   case 1 :
+		      break;
+		   default:
+			   break;
 		}
 	}
 		
