@@ -44,6 +44,13 @@ test bool methodWithIfScoresTwo(){
 	return expectedValue in result;
 }
 
+test bool methodWithIfElseScoresTwo(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/ifElseMethod()|,2>;
+	return expectedValue in result;
+}
+
 
 bool complexityForLocation(loc location, int expectedComplexity){
     success = true;

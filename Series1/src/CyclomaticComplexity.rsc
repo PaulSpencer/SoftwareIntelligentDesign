@@ -18,6 +18,7 @@ public int calculateMethodComplexity(Statement statement){
     complexity = 1;
     visit (statement) {
     	case \if(_,_) : complexity += 1;
+    	case \if(_,_,_) : complexity += 1;
     }
     return complexity;
 }
