@@ -38,92 +38,61 @@ test bool classWithConstructorIncludesConstructor(){
 }
 
 test bool methodWithIfScoresTwo(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/ifMethod()|,2>;
-	return expectedValue in result;
+	return complexityFromMethod("ifMethod",2);
 }
 
 test bool methodWithIfElseScoresTwo(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/ifElseMethod()|,2>;
-	return expectedValue in result;
+	return complexityFromMethod("ifElseMethod",2);
 }
 
 test bool methodWithConditionalScoresTwo(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/conditionalMethod()|,2>;
-	return expectedValue in result;
+	return complexityFromMethod("conditionalMethod",2);
 }
 
 test bool methodWithWhileScoresTwo(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/whileMethod()|,2>;
-	return expectedValue in result;
+	return complexityFromMethod("whileMethod",2);
 }
 
 test bool methodWithDoWhileScoresTwo(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/doWhileMethod()|,2>;
-	return expectedValue in result;
+	return complexityFromMethod("doWhileMethod",2);
 }
 
 test bool methodWithForScoresTwo(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/forMethod()|,2>;
-	return expectedValue in result;
+	return complexityFromMethod("forMethod",2);
 }
 
 
 test bool methodWithConditionalessForScoresTwo(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/forNoConditionMethod()|,2>;
-	return expectedValue in result;
+	return complexityFromMethod("forNoConditionMethod",2);
 }
 
 test bool methodWithForEachScoresTwo(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/forEachMethod()|,2>;
-	return expectedValue in result;
+	return complexityFromMethod("forEachMethod",2);
 }
 
 test bool methodWithCaseScoresOnePerCase1(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/oneCaseMethod()|,2>;
-	return expectedValue in result;
+	return complexityFromMethod("oneCaseMethod",2);
 }
 
 test bool methodWithCaseScoresOnePerCase2(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/twoCaseMethod()|,3>;
-	return expectedValue in result;
+	return complexityFromMethod("twoCaseMethod",3);
 }
 
 test bool methodWithCaseScoresOnePerCase3(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/threeCaseMethod()|,4>;
-	return expectedValue in result;
+	return complexityFromMethod("threeCaseMethod",4);
 }
 
-test bool methodWithCaseWithOnePerCasePlusDefault(){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
-	result = calculateComplexity(classWithIf);
-	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/defaultCaseMethod()|,3>;
-	return expectedValue in result;
+test bool methodWithDefaultCaseOnePerCasePlusDefault(){
+	return complexityFromMethod("defaultCaseMethod",3);
 }
 
-
-
+bool complexityFromMethod(str methodName, int expectedComplexity){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	location = |java+method:///testCode/ClassWithComplexityMethods/| + (methodName + "()");
+	expectedValue = <location,expectedComplexity>;
+	return expectedValue in result;
+}
 
 bool complexityForLocation(loc location, int expectedComplexity){
     success = true;

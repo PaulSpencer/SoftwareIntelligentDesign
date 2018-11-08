@@ -89,6 +89,44 @@ public class ClassWithComplexityMethods {
 			   break;
 		}
 	}
+
+	public void fallThroughCaseMethod() {
+		int temp = 1;
+		mylabel: 
+			
+		switch(temp) {
+		   case 1 :
+		   case 2 :
+		   case 3 :
+		   case 4 :
+			      break;
+		   case 5 :
+		   case 6 :
+		   case 7 :
+		   case 8 :
+			      break;
+		   case 10 :
+		   case 20 :
+		   case 30 :
+		   case 40 :
+			      break;
+		}
+	}
+
+	public int fallThroughCaseMethod2() {
+		int temp = 1;
+		
+		switch(temp) {
+		   case 10 :
+		   case 20 :
+		   case 30 :
+		   case 40 :
+			   return temp;
+		}
+		return temp;
+	}
+	
+	//fallThroughCaseMethod
 		
 	public void forEachMethod() {
 		String[] fruits = new String[] { "Orange", "Apple", "Pear", "Strawberry" };

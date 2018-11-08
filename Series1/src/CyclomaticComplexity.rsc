@@ -1,6 +1,7 @@
 module CyclomaticComplexity
 
 import lang::java::jdt::m3::AST; 
+import IO;
 
 public rel[loc, int] calculateComplexity(loc location) {
     metric = {};
@@ -25,8 +26,9 @@ public int calculateMethodComplexity(Statement statement){
     	case \for(_,_,_) : complexity += 1;
     	case \foreach(_,_,_) : complexity += 1;
     	case \do(_,_) : complexity += 1;
-    	case \case(_) : complexity += 1;
+    	case \case(Expression exp) : complexity += 1;
     	case \defaultCase() : complexity += 1;
     }
     return complexity;
 }
+
