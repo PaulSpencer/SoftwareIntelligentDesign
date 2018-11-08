@@ -94,6 +94,28 @@ test bool methodWithForEachScoresTwo(){
 	return expectedValue in result;
 }
 
+test bool methodWithCaseScoresOnePerCase1(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/oneCaseMethod()|,2>;
+	return expectedValue in result;
+}
+
+test bool methodWithCaseScoresOnePerCase2(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/twoCaseMethod()|,3>;
+	return expectedValue in result;
+}
+
+test bool methodWithCaseScoresOnePerCase3(){
+	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	result = calculateComplexity(classWithIf);
+	expectedValue = <|java+method:///testCode/ClassWithComplexityMethods/threeCaseMethod()|,4>;
+	return expectedValue in result;
+}
+
+
 
 
 bool complexityForLocation(loc location, int expectedComplexity){

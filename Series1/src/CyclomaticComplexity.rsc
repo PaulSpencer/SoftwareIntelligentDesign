@@ -25,6 +25,7 @@ public int calculateMethodComplexity(Statement statement){
     	case \for(_,_,_) : complexity += 1;
     	case \foreach(_,_,_) : complexity += 1;
     	case \do(_,_) : complexity += 1;
+    	case \case(_) : complexity += 1;
     }
     return complexity;
 }

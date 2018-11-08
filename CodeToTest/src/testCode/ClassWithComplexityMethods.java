@@ -48,7 +48,36 @@ public class ClassWithComplexityMethods {
         for ( ; ; ) {
             count++;
         }
-	}	
+	}
+
+	public void oneCaseMethod() {
+		int temp = 1;
+		switch(temp) {
+		   case 1 :
+		      break;
+		}
+	}
+	public void twoCaseMethod() {
+		int temp = 1;
+		switch(temp) {
+		   case 1 :
+			      break;
+		   case 2 :
+			      break;
+		}
+	}
+	
+	public void threeCaseMethod() {
+		int temp = 1;
+		switch(temp) {
+		   case 1 :
+			   break;
+		   case 2 :
+			      break;
+		   case 3 :
+			      break;
+		}
+	}
 		
 	public void forEachMethod() {
 		String[] fruits = new String[] { "Orange", "Apple", "Pear", "Strawberry" };
