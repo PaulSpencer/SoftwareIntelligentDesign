@@ -80,6 +80,37 @@ public class ClassWithComplexityMethods {
 		}
 	}
 
+	public void fallThroughCaseMethod() {
+		int temp = 1;
+		myLabel: 
+			
+		switch(temp) {
+		   case 1 :
+		   case 2 :
+		   case 3 :
+		   case 4 :
+			   break;
+		   case 5 :
+			   break myLabel ;
+		   case 6 :
+			   return;
+		   default: 
+			   throw new Error();
+		}
+	}
+	
+	public void fallThroughCaseNoBreakMethod() {
+		int temp = 1;
+		
+		switch(temp) {
+		   case 1 :
+		   case 2 :
+			   int i;
+		}
+	}
+	
+	
+	
 	public void defaultCaseMethod() {
 		int temp = 1;
 		switch(temp) {
@@ -89,49 +120,60 @@ public class ClassWithComplexityMethods {
 			   break;
 		}
 	}
-
-	public void fallThroughCaseMethod() {
-		int temp = 1;
-		mylabel: 
-			
-		switch(temp) {
-		   case 1 :
-		   case 2 :
-		   case 3 :
-		   case 4 :
-			      break;
-		   case 5 :
-		   case 6 :
-		   case 7 :
-		   case 8 :
-			      break;
-		   case 10 :
-		   case 20 :
-		   case 30 :
-		   case 40 :
-			      break;
-		}
-	}
-
-	public int fallThroughCaseMethod2() {
-		int temp = 1;
-		
-		switch(temp) {
-		   case 10 :
-		   case 20 :
-		   case 30 :
-		   case 40 :
-			   return temp;
-		}
-		return temp;
-	}
-	
-	//fallThroughCaseMethod
 		
 	public void forEachMethod() {
 		String[] fruits = new String[] { "Orange", "Apple", "Pear", "Strawberry" };
 		for (String fruit : fruits) {
 		}
 	}
+	
+	public void catchMethod() {
+		try
+		{
+			
+		}
+		catch (Exception e)
+		{
+			
+		}
+	}
+
+	public void ifAndOrMethod() {
+		if (true || false) {
+			
+		}
+	}
+	
+	public void ifAndTwoOrsMethod() {
+		if (true || false || false) {
+			
+		}
+	}
+	
+	public void ifAndAndMethod() {
+		if (true && false) {
+			
+		}
+	}
+	
+	public void ifAndTwoAndsMethod() {
+		if (true && false && false) {
+			
+		}
+	}
+
+	public void ifElseAndOrMethod() {
+		if (true || false) {
+			
+		}
+		else {
+			
+		}
+	}
+	
+	public void conditionalAndAndMethod() {		
+	    String temp2 = true && true ? "trueChoice" : "falseChoice";
+	}
+	
 	
 }

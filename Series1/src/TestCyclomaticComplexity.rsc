@@ -61,7 +61,6 @@ test bool methodWithForScoresTwo(){
 	return complexityFromMethod("forMethod",2);
 }
 
-
 test bool methodWithConditionalessForScoresTwo(){
 	return complexityFromMethod("forNoConditionMethod",2);
 }
@@ -84,6 +83,47 @@ test bool methodWithCaseScoresOnePerCase3(){
 
 test bool methodWithDefaultCaseOnePerCasePlusDefault(){
 	return complexityFromMethod("defaultCaseMethod",3);
+}
+
+test bool methodWithCatchScoresTwo(){
+	return complexityFromMethod("catchMethod",2);
+}
+
+
+test bool methodWithIfAndOrScoresThree(){
+	return complexityFromMethod("ifAndOrMethod",3);
+}
+
+test bool methodWithIfAndTwoOrsScoresFour(){
+	return complexityFromMethod("ifAndTwoOrsMethod",4);
+}
+
+test bool methodWithIfAndAndScoresThree(){
+	return complexityFromMethod("ifAndAndMethod",3);
+}
+
+test bool methodWithIfAndTwoAndsScoresFour(){
+	return complexityFromMethod("ifAndTwoAndsMethod",4);
+}
+
+test bool ifElseAndOrMethodScoresThree(){
+	return complexityFromMethod("ifElseAndOrMethod",3);
+}
+
+test bool conditionalAndAndMethodScoresThree(){
+	return complexityFromMethod("conditionalAndAndMethod",3);
+}
+
+test bool conditionalAndAndMethodScoresThree(){
+	return complexityFromMethod("conditionalAndAndMethod",3);
+}
+
+test bool caseDoesnotCountFallThrough(){
+	return complexityFromMethod("fallThroughCaseMethod",5);
+}
+
+test bool caseDoesnotCountFallThroughUnlessAllEmpty(){
+	return complexityFromMethod("fallThroughCaseNoBreakMethod",2);
 }
 
 bool complexityFromMethod(str methodName, int expectedComplexity){
