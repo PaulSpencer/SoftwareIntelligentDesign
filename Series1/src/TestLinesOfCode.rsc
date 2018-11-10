@@ -59,4 +59,9 @@ test bool MultiLineCommentsEndsBeforeTextCountsline() {
 	return linesOfCode(fileWithMultiLine) == 4;
 }
 
+test bool StringInCommentsDoesnotEffectCount() {
+    fileWithMultiLine = |project://CodeToTest/src/testCode/LinesOfCodeTests/StringWithComments.java|;
+	return linesOfCode(fileWithMultiLine) == 9;
+}
+
 
