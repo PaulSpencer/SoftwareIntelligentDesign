@@ -126,10 +126,32 @@ test bool caseDoesnotCountFallThroughUnlessAllEmpty(){
 	return complexityFromMethod("fallThroughCaseNoBreakMethod",2);
 }
 
+/*
+test bool switchInSwitchEdgeCase(){
+	println();
+	println("--------------");
+	println();
+	println("Edge Case : ");
+	println();
+
+	return complexityFromEdgeCases("convertExpressionIfNeeded",7);
+
+}
+*/
+
+
 bool complexityFromMethod(str methodName, int expectedComplexity){
-	classWithIf = |project://CodeToTest/src/testCode/ClassWithComplexityMethods.java|;
+	return complexityFromMethodBase("ClassWithComplexityMethods", methodName, expectedComplexity);
+}
+
+bool complexityFromEdgeCases(str methodName, int expectedComplexity) {
+	return complexityFromMethodBase("ClassWithComplexityEdgeCases", methodName, expectedComplexity);
+}
+
+bool complexityFromMethodBase(str className, str methodName, int expectedComplexity){
+	classWithIf = |project://CodeToTest/src/testCode/| + (className +".java");
 	result = calculateComplexity(classWithIf);
-	location = |java+method:///testCode/ClassWithComplexityMethods/| + (methodName + "()");
+	location = |java+method:///testCode/| + (className + "/" + methodName + "()");
 	expectedValue = <location,expectedComplexity>;
 	return expectedValue in result;
 }

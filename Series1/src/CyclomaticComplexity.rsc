@@ -27,35 +27,24 @@ public int calculateMethodComplexity(Statement statement){
     	case \for(_,_,_) : complexity += 1;
     	case \foreach(_,_,_) : complexity += 1;
     	case \do(_,_) : complexity += 1;
-    	case \case(_) : complexity += 1;
-    	case \defaultCase() : complexity += 1;
     	case \catch(_,_) : complexity += 1;    	
 		case \infix(_, "||",_) : complexity += 1;
 		case \infix(_, "&&",_) : complexity += 1;
-		case \switch(_, statements) : complexity -= fallThroughCount(statements);
+		case \switch(_, statements) : complexity += casesNoFallThrough(statements);
     }
-        
     return complexity;
 }
 
-public int fallThroughCount(list[Statement] statements){
-	caseCount = 0;
+public int casesNoFallThrough(list[Statement] statements){
 	breakCount = 0;
 	for(statement <- statements){
 		visit (statement) {
-    	   case \case(_) : caseCount +=1;
-    	   case \defaultCase() : caseCount += 1;
-    	   case \break() : breakCount += 1;
+    	   case \break() : breakCount += 1; 
     	   case \break(_) : breakCount += 1;
     	   case \return() : breakCount += 1;
     	   case \return(_) : breakCount += 1;
     	   case \throw(_) : breakCount += 1;
     	}
-    }
-    
-    if(breakCount == 0) {
-    	return 1;
-    } else {
- 	 	return caseCount - breakCount;
-	}
+    }    
+    return breakCount == 0 ? 1 : breakCount;
 }
