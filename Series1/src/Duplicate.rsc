@@ -49,6 +49,7 @@ public tuple[bool, str] removeComments(bool isInMultiline, str originalLine){
 				commentFreeLine += "";				
 				remainingCharacters = "";
 			} else {
+				
 				isInMultiline = false;
 				int split = head(mlces);
 				split +=2;
@@ -62,10 +63,8 @@ public tuple[bool, str] removeComments(bool isInMultiline, str originalLine){
 				remainingCharacters = "";
 			} else {
 				if (min(combined) in qs) {
-					<_,qs> = pop(qs);
-					<split,qs> = pop(qs);
+					int split = qs[1] +1;
 					commentFreeLine += substring(remainingCharacters,0,split);
-					split +=1;
 					remainingCharacters = substring(remainingCharacters,split);
 				} else {
 					if(min(combined) in slcs) {

@@ -72,9 +72,53 @@ test bool removeCommentsIfMultilineStartsIsInMultiline(){
 
 test bool removeCommentsIfMultilineStartsAndEndsOnlyCommentGoes(){
 	<_,cleaned> = removeComments(false, "before /* */ after");
-	println("cleaned : <cleaned>");
-	println("expected : before after");
 	return cleaned == "before  after";
 }
 
+test bool removeCommentsIfMultilineStartsAndEndsOnlyCommentGoes2(){
+	<_,cleaned> = removeComments(false, "before /* */ middle /* */ after");
+	return cleaned == "before  middle  after";
+}
 
+test bool removeCommentCommentsInStrings(){
+	<_,cleaned> = removeComments(false, "String myString = \"// /* */\"");
+	return cleaned == "String myString = \"// /* */\"";
+}
+
+test bool removeCommentsStringInSingleLine(){
+	<_,cleaned> = removeComments(false, "temp = \"\";// \"// /* */\"");
+	return cleaned == "temp = \"\";";
+}
+
+
+test bool removeCommentsStringInMultiLine1(){
+	<_,cleaned> = removeComments(false, "temp = \"\"/* \"xxx\"*/;");
+	return cleaned == "temp = \"\";";
+}
+
+test bool removeCommentsStringInMultiLine2(){
+	<_,cleaned> = removeComments(false, "temp = \"\"/* \" // \"*/;");
+	return cleaned == "temp = \"\";";
+}
+
+test bool removeCommentsStringInMultiLine3(){
+	<_,cleaned> = removeComments(false, "temp = \"\"/* \" /* \"*/;");
+	return cleaned == "temp = \"\";";
+}
+
+test bool removeCommentsStringInMultiLine5(){
+	<_,cleaned> = removeComments(true, " \"xxx\" */123;");
+	return cleaned == "123;";
+}
+
+test bool removeCommentsStringInMultiLine6(){
+	<_,cleaned> = removeComments(false, "123;/* \"xxx\"");
+	return cleaned == "123;";
+}
+
+test bool removeCommentsStringInMultiLine7(){
+	<_,cleaned> = removeComments(false, "123/* \"xxx\"*/456");
+	return cleaned == "123456";
+}
+
+// To do, handle Java docs?
