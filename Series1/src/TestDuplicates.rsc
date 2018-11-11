@@ -43,10 +43,20 @@ test bool removeCommentsNotInMultilineNoStartTagStillNot(){
 	return multilineFlag == false;
 }
 
-/*
 test bool removeCommentsInMultilineNoEndTagTextGone(){
 	<_,cleaned> = removeComments(true, "whatever");
 	return cleaned == "";
 }
-*/
+
+test bool removeCommentsInMultilineHasEndTagNotInMultiline(){
+	<multilineFlag,_> = removeComments(true, "dpofgjdpogk */");
+	return multilineFlag == false;
+}
+
+test bool removeCommentsInMultilineHasEndTagReturnsTextAfterTag(){
+	<_,cleaned> = removeComments(true, "before */ after");
+	return cleaned == " after";
+}
+
+
 

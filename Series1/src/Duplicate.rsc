@@ -27,9 +27,22 @@ public rel[loc, loc] FindDuplicates(loc project) {
 */
 
 public tuple[bool, str] removeComments(bool isInMultiline, str line){
+
+	if(isInMultiline) {
+		multiLineClosePosition = findFirst(line,"*/");
+		if (multiLineClosePosition !=-1){
+			isInMultiline = false;
+			line = substring(line, multiLineClosePosition+2);
+		} else {
+			line = "";
+		}
+	}
+	
+
+	
 	singleLineCommentPosition = findFirst(line,"//");
 	if (singleLineCommentPosition != -1) {
-		return <isInMultiline, substring(line, 0, singleLineCommentPosition)>;
+		line = substring(line, 0, singleLineCommentPosition);
 	}
 	return <isInMultiline, line>;
 }
