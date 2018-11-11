@@ -26,23 +26,37 @@ public rel[loc, loc] FindDuplicates(loc project) {
 }
 */
 
-public tuple[bool, str] removeComments(bool isInMultiline, str line){
-
-	if(isInMultiline) {
-		multiLineClosePosition = findFirst(line,"*/");
-		if (multiLineClosePosition !=-1){
-			isInMultiline = false;
-			line = substring(line, multiLineClosePosition+2);
-		} else {
-			line = "";
+public tuple[bool, str] removeComments(bool isInMultiline, str originalLine){
+	remainingCharacters = originalLine;
+	commentFreeLine = "";
+	while (size(remainingCharacters) > 0) {
+		if(isInMultiline) {
+			multiLineClosePosition = findFirst(remainingCharacters,"*/");
+			if (multiLineClosePosition !=-1){
+				isInMultiline = false;
+				commentFreeLine += substring(remainingCharacters, multiLineClosePosition+2);
+				remainingCharacters = "";
+			} else {
+				commentFreeLine += "";				
+				remainingCharacters = "";
+			}
+		} else {			
+			multiLineOpenPosition = findFirst(remainingCharacters,"/*");
+			if (multiLineOpenPosition !=-1) {
+				commentFreeLine = substring(remainingCharacters, 0, multiLineOpenPosition);
+				remainingCharacters = "";
+				isInMultiline = true;
+			}
+			singleLineCommentPosition = findFirst(remainingCharacters,"//");
+			if (singleLineCommentPosition != -1) {
+				commentFreeLine += substring(remainingCharacters, 0, singleLineCommentPosition);
+				remainingCharacters = "";
+			} else {
+				commentFreeLine += remainingCharacters;
+				remainingCharacters = "";
+			}
 		}
 	}
 	
-
-	
-	singleLineCommentPosition = findFirst(line,"//");
-	if (singleLineCommentPosition != -1) {
-		line = substring(line, 0, singleLineCommentPosition);
-	}
-	return <isInMultiline, line>;
+	return <isInMultiline, commentFreeLine>;
 }

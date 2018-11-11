@@ -58,5 +58,14 @@ test bool removeCommentsInMultilineHasEndTagReturnsTextAfterTag(){
 	return cleaned == " after";
 }
 
+test bool removeCommentsIfMultilineStartsKeepTextBefore(){
+	<_,cleaned> = removeComments(false, "before /* after");
+	return cleaned == "before ";
+}
+
+test bool removeCommentsIfMultilineStartsIsInMultiline(){
+	<multilineFlag,_> = removeComments(false, "before /* after");
+	return multilineFlag == true;
+}
 
 
