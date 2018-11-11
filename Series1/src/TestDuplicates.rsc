@@ -1,6 +1,7 @@
 module TestDuplicates
 
 import Duplicate;
+import IO;
 
 test bool removeCommentsEmptyReturnsEmpty(){
 	<_,cleaned> = removeComments(false, "");
@@ -21,4 +22,31 @@ test bool removeCommentsSingleLineRemovesText(){
 	<_,cleaned> = removeComments(false, "//this is a comment");
 	return cleaned == "";
 }
+
+test bool removeCommentsSingleLineRemovesTextPreservesPrior1(){
+	<_,cleaned> = removeComments(false, "	//this is a comment");
+	return cleaned == "	";
+}
+
+test bool removeCommentsSingleLineRemovesTextPreservesPrior2(){
+	<_,cleaned> = removeComments(false, "abc123 //this is a comment");
+	return cleaned == "abc123 ";
+}
+
+test bool removeCommentsInMultilineNoEndTagStillInMultiline(){
+	<multilineFlag,_> = removeComments(true, "whatever");
+	return multilineFlag == true;
+}
+
+test bool removeCommentsNotInMultilineNoStartTagStillNot(){
+	<multilineFlag,_> = removeComments(false, "whatever");
+	return multilineFlag == false;
+}
+
+/*
+test bool removeCommentsInMultilineNoEndTagTextGone(){
+	<_,cleaned> = removeComments(true, "whatever");
+	return cleaned == "";
+}
+*/
 
