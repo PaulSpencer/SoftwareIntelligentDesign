@@ -55,6 +55,8 @@ test bool removeCommentsInMultilineHasEndTagNotInMultiline(){
 
 test bool removeCommentsInMultilineHasEndTagReturnsTextAfterTag(){
 	<_,cleaned> = removeComments(true, "before */ after");
+	println("cleaned : <cleaned>");
+	println("expected :  after");
 	return cleaned == " after";
 }
 
@@ -66,6 +68,13 @@ test bool removeCommentsIfMultilineStartsKeepTextBefore(){
 test bool removeCommentsIfMultilineStartsIsInMultiline(){
 	<multilineFlag,_> = removeComments(false, "before /* after");
 	return multilineFlag == true;
+}
+
+test bool removeCommentsIfMultilineStartsAndEndsOnlyCommentGoes(){
+	<_,cleaned> = removeComments(false, "before /* */ after");
+	println("cleaned : <cleaned>");
+	println("expected : before after");
+	return cleaned == "before  after";
 }
 
 

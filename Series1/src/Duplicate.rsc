@@ -3,6 +3,8 @@ module Duplicate
 import lang::java::jdt::m3::Core; 
 import IO;
 import String;
+import List;
+import Type;
 
 public loc smallSqlProject = |project://smallsql0.21_src|;
 
@@ -26,34 +28,58 @@ public rel[loc, loc] FindDuplicates(loc project) {
 }
 */
 
+public list[int] getQuotes(str line){
+	quotes = findAll(line,"\"");	
+	escaped = [q+1 | q <- findAll(line,"\\\"")];
+	return quotes - escaped;
+}
+
+
 public tuple[bool, str] removeComments(bool isInMultiline, str originalLine){
 	remainingCharacters = originalLine;
 	commentFreeLine = "";
+
 	while (size(remainingCharacters) > 0) {
+		qs = getQuotes(remainingCharacters);
+		mlcss = findAll(remainingCharacters,"/*");
+		mlces = findAll(remainingCharacters,"*/");
+		slcs = findAll(remainingCharacters,"//");
 		if(isInMultiline) {
-			multiLineClosePosition = findFirst(remainingCharacters,"*/");
-			if (multiLineClosePosition !=-1){
-				isInMultiline = false;
-				commentFreeLine += substring(remainingCharacters, multiLineClosePosition+2);
-				remainingCharacters = "";
-			} else {
+			if (isEmpty(mlces)){			
 				commentFreeLine += "";				
 				remainingCharacters = "";
-			}
-		} else {			
-			multiLineOpenPosition = findFirst(remainingCharacters,"/*");
-			if (multiLineOpenPosition !=-1) {
-				commentFreeLine = substring(remainingCharacters, 0, multiLineOpenPosition);
-				remainingCharacters = "";
-				isInMultiline = true;
-			}
-			singleLineCommentPosition = findFirst(remainingCharacters,"//");
-			if (singleLineCommentPosition != -1) {
-				commentFreeLine += substring(remainingCharacters, 0, singleLineCommentPosition);
-				remainingCharacters = "";
 			} else {
+				isInMultiline = false;
+				int split = head(mlces);
+				split +=2;
+				remainingCharacters = substring(remainingCharacters,split);
+			}
+		} else {	
+			combined = qs + mlcss + slcs;
+			commments = mlcss + slcs;
+			if (isEmpty(commments)) {
 				commentFreeLine += remainingCharacters;
 				remainingCharacters = "";
+			} else {
+				if (min(combined) in qs) {
+					<_,qs> = pop(qs);
+					<split,qs> = pop(qs);
+					commentFreeLine += substring(remainingCharacters,0,split);
+					split +=1;
+					remainingCharacters = substring(remainingCharacters,split);
+				} else {
+					if(min(combined) in slcs) {
+						int split = min(slcs);
+						commentFreeLine += substring(remainingCharacters, 0, split);
+						remainingCharacters = "";
+					} else {
+						isInMultiline = true;
+						int split = min(mlcss);
+						commentFreeLine += substring(remainingCharacters, 0, split);
+						split+=2;
+						remainingCharacters = substring(remainingCharacters,split);
+					}
+				}
 			}
 		}
 	}
