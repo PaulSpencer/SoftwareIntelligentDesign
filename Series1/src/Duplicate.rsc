@@ -8,25 +8,29 @@ import Type;
 
 public loc smallSqlProject = |project://smallsql0.21_src|;
 
-/*
-public rel[loc, loc] FindDuplicates(loc project) {
+
+public rel[loc, str] FindDuplicates(loc project) {
     duplicates = {};
     for (file <- files(createM3FromEclipseProject(project))) {
-    	firstPart =|java+compilationUnit:///| + file.path;
     	linenr=0;
     	offset=0;
     	isInMultilineComment = false;
     	for (line <- readFileLines(file)) {
-    		length = size(line);
-    		lineLocation = firstPart(offset,length+1,<linenr,0>,<linenr,length>);
-    		println(lineLocation);
-    		linenr = linenr + 1;
-    		offset = offset + length +2;
+    		<linenr, offset, location> = getLineLocation(linenr, offset, file, line);
+    		<isInMultilineComment, line> = removeComments(isInMultilineComment, line);
+    		line = trim(line);
+    		duplicates += <location, line>;
     	}
 	}
 	return duplicates;
 }
-*/
+
+tuple[int, int, loc] getLineLocation(int linenr, int offset, loc file, str line) {
+    firstPart =|java+compilationUnit:///| + file.path;	
+    length = size(line);
+    lineLocation = firstPart(offset,length+1,<linenr,0>,<linenr,length>);
+	return <linenr + 1, offset + length +2, lineLocation>;
+}
 
 public list[int] getQuotes(str line){
 	quotes = findAll(line,"\"");	
