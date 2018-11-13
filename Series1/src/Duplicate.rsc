@@ -12,11 +12,20 @@ public loc smallSqlProject = |project://smallsql0.21_src|;
 public rel[loc,loc] findDuplicates(loc project) {
 	duplicates = {};
 	lines = getCleanedLines(project);
+	// store everyline and a count of their use
+	// only worry about storing 6 or more lines if they contain replicated lines
+	// so we should be shifting through a file, one line at a time 
+	// storing every time we reach a number larger than 6 dumping once we hit a unique line
+	// everytime we reach a 6 line match minus one from the line store
+	// everytime we dump less than 6 line collections minus one from the line store
+	
 	return duplicates;
 }
 
+
+
 public rel[loc, str] getCleanedLines(loc project) {
-    duplicates = {};
+    lines = {};
     for (file <- files(createM3FromEclipseProject(project))) {
     	linenr=0;
     	offset=0;
@@ -25,10 +34,10 @@ public rel[loc, str] getCleanedLines(loc project) {
     		<linenr, offset, location> = getLineLocation(linenr, offset, file, line);
     		<isInMultilineComment, line> = removeComments(isInMultilineComment, line);
     		line = trim(line);
-    		duplicates += <location, line>;
+    		lines += <location, line>;
     	}
 	}
-	return duplicates;
+	return lines;
 }
 
 tuple[int, int, loc] getLineLocation(int linenr, int offset, loc file, str line) {
