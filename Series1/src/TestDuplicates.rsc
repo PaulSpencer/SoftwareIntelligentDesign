@@ -3,6 +3,16 @@ module TestDuplicates
 import Duplicate;
 import IO;
 
+// duplicates
+test bool exactMatch(){
+	duplicates = findDuplicates(|project://CodeWithDuplicates|);
+	fileLocation = |java+compilationUnit://CodeWithDuplicates/src/ClassWithDuplicates1.java|;
+	firstMethodLocation = fileLocation(37,94,<3,0>,<8,6>);
+	secondMethodLocation = fileLocation(170,94,<12,0>,<17,6>);
+	return <firstMethodLocation,secondMethodLocation> in  duplicates;
+}
+
+// comment removal
 test bool removeCommentsEmptyReturnsEmpty(){
 	<_,cleaned> = removeComments(false, "");
 	return cleaned == "";
@@ -55,8 +65,6 @@ test bool removeCommentsInMultilineHasEndTagNotInMultiline(){
 
 test bool removeCommentsInMultilineHasEndTagReturnsTextAfterTag(){
 	<_,cleaned> = removeComments(true, "before */ after");
-	println("cleaned : <cleaned>");
-	println("expected :  after");
 	return cleaned == " after";
 }
 
@@ -89,7 +97,6 @@ test bool removeCommentsStringInSingleLine(){
 	<_,cleaned> = removeComments(false, "temp = \"\";// \"// /* */\"");
 	return cleaned == "temp = \"\";";
 }
-
 
 test bool removeCommentsStringInMultiLine1(){
 	<_,cleaned> = removeComments(false, "temp = \"\"/* \"xxx\"*/;");
@@ -126,6 +133,11 @@ test bool removeCommentEscapedQuotesInStrings(){
 	return cleaned == "String myString = \"\\\"//\"";
 }
 
-
+//test bool noHashClash(str lineone, str linetwo){
+//	if (lineone == linetwo) { 
+//		return true;
+//	}
+//	return hash(lineone) != hash(linetwo);
+//}
 
 // To do, handle Java docs?
