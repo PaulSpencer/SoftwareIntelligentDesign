@@ -9,7 +9,13 @@ import Type;
 public loc smallSqlProject = |project://smallsql0.21_src|;
 
 
-public rel[loc, str] FindDuplicates(loc project) {
+public rel[loc,loc] findDuplicates(loc project) {
+	duplicates = {};
+	lines = getCleanedLines(project);
+	return duplicates;
+}
+
+public rel[loc, str] getCleanedLines(loc project) {
     duplicates = {};
     for (file <- files(createM3FromEclipseProject(project))) {
     	linenr=0;
@@ -34,8 +40,8 @@ tuple[int, int, loc] getLineLocation(int linenr, int offset, loc file, str line)
 
 public list[int] getQuotes(str line){
 	quotes = findAll(line,"\"");	
-	escaped = [q+1 | q <- findAll(line,"\\\"")];
-	return quotes - escaped;
+	escapedQuotes = [q+1 | q <- findAll(line,"\\\"")];
+	return quotes - escapedQuotes;
 }
 
 
