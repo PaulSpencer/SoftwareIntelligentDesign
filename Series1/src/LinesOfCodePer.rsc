@@ -1,5 +1,4 @@
-module LinesOfCodePerMethodMethod
-
+module LinesOfCodePer
 
 import lang::java::jdt::m3::Core;
 import lang::java::m3::Core;
@@ -28,7 +27,6 @@ public rel[loc, int] countLinesPerMethod(loc prj){
 }
 
 
-//try to make it for a project
 public void countLinesPerProject(loc prj){
     counter = 0;
     for (file <- files(createM3FromEclipseProject(prj))) {
