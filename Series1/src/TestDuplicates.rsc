@@ -6,9 +6,17 @@ import IO;
 // duplicates
 test bool exactMatch(){
 	duplicates = findDuplicates(|project://CodeWithDuplicates|);
-	fileLocation = |java+compilationUnit://CodeWithDuplicates/src/ClassWithDuplicates1.java|;
-	firstMethodLocation = fileLocation(37,94,<3,0>,<8,6>);
-	secondMethodLocation = fileLocation(170,94,<12,0>,<17,6>);
+	fileLocation = |java+compilationUnit:///src/ClassWithDuplicates1.java|;
+	firstMethodLocation = fileLocation(39,70,<2,0>,<7,2>);
+	secondMethodLocation = fileLocation(152,70,<11,0>,<16,2>);
+	return <firstMethodLocation,secondMethodLocation> in  duplicates;
+}
+
+test bool exactMatch2(){
+	duplicates = findDuplicates(|project://CodeWithDuplicates|);
+	fileLocation = |java+compilationUnit:///src/ClassWithDuplicates1.java|;
+	firstMethodLocation = fileLocation(39,70,<2,0>,<7,2>);
+	secondMethodLocation = fileLocation(265,70,<20,0>,<25,2>);
 	return <firstMethodLocation,secondMethodLocation> in  duplicates;
 }
 

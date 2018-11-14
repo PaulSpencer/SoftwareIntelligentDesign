@@ -15,11 +15,25 @@ public rel[loc,loc] findDuplicates(loc project) {
 
 public rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
 	duplicates = {};
-	fileLocation = |java+compilationUnit://CodeWithDuplicates/src/ClassWithDuplicates1.java|;
-	firstMethodLocation = fileLocation(37,94,<3,0>,<8,6>);
-	secondMethodLocation = fileLocation(170,94,<12,0>,<17,6>);
-	duplicates += <firstMethodLocation, secondMethodLocation>;
-	return duplicates;
+	allLineSpans = {};
+	for (lineLocationPair <- [<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, l1.begin.line <= l2.begin.line]) {
+		allLineSpans += getSpan(lineLocationPair);
+	}
+	
+	return {<s1, s2> | s1 <- allLineSpans, s2 <- allLineSpans};
+	
+}
+
+public loc getSpan(tuple[loc, loc] locationPair){
+	<beginLocation, endLocation> = locationPair;
+	path = beginLocation.path;
+	offset = beginLocation.offset;
+	length = (endLocation.offset - beginLocation.offset) + endLocation.length;
+	beginLine = beginLocation.begin.line;
+	endLine = endLocation.end.line;
+	endColumn = endLocation.end.column;
+	span = |java+compilationUnit:///| + path;
+	return span(offset, length,<beginLine,0>,<endLine, endColumn>);
 }
 
 public list[tuple[loc, str]] getCleanedLines(loc project) {
