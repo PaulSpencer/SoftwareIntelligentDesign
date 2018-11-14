@@ -140,5 +140,6 @@ test bool removeCommentEscapedQuotesInStrings(){
 	<_,cleaned> = removeComments(false, "String myString = \"\\\"//\"");
 	return cleaned == "String myString = \"\\\"//\"";
 }
-
+// "
+//  \" \\\" \"
 // To do, handle Java docs?

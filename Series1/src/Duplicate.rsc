@@ -9,7 +9,7 @@ import Type;
 public loc smallSqlProject = |project://smallsql0.21_src|;
 
 public rel[loc,loc] findDuplicates(loc project) {
-	lines = getCleanedLines(project);
+	lines = getCleanedLinesForProject(project);
 	return getDuplicatesFromLines(lines);
 }
 
@@ -86,8 +86,7 @@ public tuple[bool, str] removeComments(bool isInMultiline, str originalLine){
 			if (isEmpty(mlces)){			
 				commentFreeLine += "";				
 				remainingCharacters = "";
-			} else {
-				
+			} else {				
 				isInMultiline = false;
 				int split = head(mlces);
 				split +=2;
