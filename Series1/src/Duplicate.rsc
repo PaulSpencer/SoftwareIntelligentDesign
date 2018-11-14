@@ -16,11 +16,12 @@ public rel[loc,loc] findDuplicates(loc project) {
 public rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
 	duplicates = {};
 	allLineSpans = {};
-	for (lineLocationPair <- [<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, l1.begin.line <= l2.begin.line]) {
-		allLineSpans += getSpan(lineLocationPair);
+	lines = [<lineLocation, text> | <lineLocation, text> <- lines, text != ""];
+	for (lineLocationPair <- [<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line]) {
+		allLineSpans += <getSpan(lineLocationPair), getSpanText(lines,lineLocationPair)>;
 	}
 		
-	return {<s1, s2> | s1 <- allLineSpans, s2 <- allLineSpans};
+	return {<s1, s2> | <s1,_> <- allLineSpans, <s2,_> <- allLineSpans};
 }
 
 public loc getSpan(tuple[loc, loc] locationPair){
@@ -56,8 +57,6 @@ public list[tuple[loc, str]] getCleanedLinesForFile(loc file) {
 	}
 	return lines;
 }
-
-
 
 tuple[int, int, loc] getLineLocation(int linenr, int offset, loc file, str line) {
     firstPart =|java+compilationUnit:///| + file.path;	
