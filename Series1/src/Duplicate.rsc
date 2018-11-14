@@ -19,9 +19,8 @@ public rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
 	for (lineLocationPair <- [<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, l1.begin.line <= l2.begin.line]) {
 		allLineSpans += getSpan(lineLocationPair);
 	}
-	
+		
 	return {<s1, s2> | s1 <- allLineSpans, s2 <- allLineSpans};
-	
 }
 
 public loc getSpan(tuple[loc, loc] locationPair){
@@ -36,21 +35,28 @@ public loc getSpan(tuple[loc, loc] locationPair){
 	return span(offset, length,<beginLine,0>,<endLine, endColumn>);
 }
 
-public list[tuple[loc, str]] getCleanedLines(loc project) {
+public list[tuple[loc, str]] getCleanedLinesForProject(loc project) {
     lines = [];
     for (file <- files(createM3FromEclipseProject(project))) {
-    	linenr=0;
-    	offset=0;
-    	isInMultilineComment = false;
-    	for (line <- readFileLines(file)) {
-    		<linenr, offset, location> = getLineLocation(linenr, offset, file, line);
-    		<isInMultilineComment, line> = removeComments(isInMultilineComment, line);
-    		line = trim(line);
-    		lines += <location, line>;
-    	}
+		lines += getCleanedLinesForFile(file);
 	}
 	return lines;
 }
+
+public list[tuple[loc, str]] getCleanedLinesForFile(loc file) {
+	lines = [];
+	linenr=0;
+	offset=0;
+	isInMultilineComment = false;
+	for (line <- readFileLines(file)) {
+		<linenr, offset, location> = getLineLocation(linenr, offset, file, line);
+		<isInMultilineComment, line> = removeComments(isInMultilineComment, line);
+		line = trim(line);
+		lines += <location, line>;
+	}
+	return lines;
+}
+
 
 
 tuple[int, int, loc] getLineLocation(int linenr, int offset, loc file, str line) {

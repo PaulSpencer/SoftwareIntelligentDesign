@@ -141,11 +141,4 @@ test bool removeCommentEscapedQuotesInStrings(){
 	return cleaned == "String myString = \"\\\"//\"";
 }
 
-//test bool noHashClash(str lineone, str linetwo){
-//	if (lineone == linetwo) { 
-//		return true;
-//	}
-//	return hash(lineone) != hash(linetwo);
-//}
-
 // To do, handle Java docs?
