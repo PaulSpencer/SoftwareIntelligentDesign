@@ -4,6 +4,7 @@ import List;
 import IO;
 import String;
 
+
 public int linesOfCode(loc location){
 	return size(readFileLines(location)) - singleComment(readFileLines(location));
 }
