@@ -16,8 +16,28 @@ test bool exactMatch2(){
 	duplicates = findDuplicates(|project://CodeWithDuplicates|);
 	fileLocation = |java+compilationUnit:///src/ClassWithDuplicates1.java|;
 	firstMethodLocation = fileLocation(39,70,<2,0>,<7,2>);
-	secondMethodLocation = fileLocation(265,70,<20,0>,<25,2>);
+	secondMethodLocation = fileLocation(281,70,<21,0>,<26,2>);
 	return <firstMethodLocation,secondMethodLocation> in  duplicates;
+}
+
+test bool matchWithCommentsAndBlankLines(){
+	duplicates = findDuplicates(|project://CodeWithDuplicates|);
+	fileLocation = |java+compilationUnit:///src/ClassWithDuplicates1.java|;
+	firstMethodLocation = fileLocation(39,70,<2,0>,<7,2>);
+	secondMethodLocation = fileLocation(410,112,<31,0>,<41,2>);
+	return <firstMethodLocation,secondMethodLocation> in  duplicates;
+}
+
+test bool dontIncludeSmallerMatchIfBiggerAvailable(){
+	return true;
+}
+
+test bool dontMatch(){
+	duplicates = findDuplicates(|project://CodeWithDuplicates|);
+	fileLocation = |java+compilationUnit:///src/ClassWithDuplicates1.java|;
+	firstMethodLocation = fileLocation(39,70,<2,0>,<7,2>);
+	secondMethodLocation = fileLocation(178,47,<12,0>,<17,1>);
+	return <firstMethodLocation,secondMethodLocation> notin  duplicates;
 }
 
 // comment removal
@@ -140,6 +160,5 @@ test bool removeCommentEscapedQuotesInStrings(){
 	<_,cleaned> = removeComments(false, "String myString = \"\\\"//\"");
 	return cleaned == "String myString = \"\\\"//\"";
 }
-// "
-//  \" \\\" \"
+
 // To do, handle Java docs?

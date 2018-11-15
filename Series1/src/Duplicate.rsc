@@ -5,6 +5,7 @@ import IO;
 import String;
 import List;
 import Type;
+import Map;
 
 public loc smallSqlProject = |project://smallsql0.21_src|;
 
@@ -14,18 +15,36 @@ public rel[loc,loc] findDuplicates(loc project) {
 }
 
 public rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
-	duplicates = {};
-	allLineSpans = {};
+	map[str, list[loc]] textMap = ();
 	lines = [<lineLocation, text> | <lineLocation, text> <- lines, text != ""];
 	for (lineLocationPair <- [<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line]) {
-		allLineSpans += getSpan(lineLocationPair);
-		//allLineSpans += <getSpan(lineLocationPair), getSpanText(lines,lineLocationPair)>;
+		spanLocation = getSpan(lineLocationPair);
+		spanText = getSpanText(lines,spanLocation);
+		if (spanText in textMap) {
+			textMap[spanText] = textMap[spanText] + [spanLocation];
+		} else {		
+			textMap += (spanText : [spanLocation]);
+		}
 	}
 	
-	return {<s1, s2> | s1 <- allLineSpans, s2 <- allLineSpans};
-	//return {<s1, s2> | <s1,_> <- allLineSpans, <s2,_> <- allLineSpans};
+	rel[loc,loc] duplicates = {};
+    for (text <- (text : textMap[text] | text <- textMap, size(textMap[text]) > 1)) {
+    	locations = textMap[text];
+    	firstLoc = head(locations);
+    	for (nextLoc <- tail(locations)) {
+    		duplicates += <firstLoc, nextLoc>;
+    		println(nextLoc);
+    	}
+    }
+	
+	return duplicates;
 }
 
+public str getSpanText(list[tuple[loc, str]] lines, loc span) {
+	linesInSpan = [text | <line, text> <- lines, line <= span];
+	allLines = intercalate("\n", linesInSpan);
+	return allLines;
+}
 
 public loc getSpan(tuple[loc, loc] locationPair){
 	<beginLocation, endLocation> = locationPair;
