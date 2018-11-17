@@ -6,6 +6,7 @@ import String;
 import List;
 import Type;
 import Map;
+import Set;
 
 public loc smallSqlProject = |project://smallsql0.21_src|;
 
@@ -13,11 +14,22 @@ public rel[loc,loc] findDuplicates(loc project) {
 	lines = getCleanedLinesForProject(project);
 	return getDuplicatesFromLines(lines);
 }
-
-public rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
-	map[str, list[loc]] textMap = ();
+	
+rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
 	lines = [<lineLocation, text> | <lineLocation, text> <- lines, text != ""];
-	for (lineLocationPair <- [<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line && l1.path == l2.path]) {
+	
+	textMap = makeTextMapFromLines(lines);
+	duplicateLocations = extractDuplicatesFromTextMap(textMap);
+	subsetDuplicates = getIncludedSmallerDuplicates(duplicateLocations);
+	
+	return duplicateLocations - subsetDuplicates;
+}
+
+map[str, list[loc]] makeTextMapFromLines(list[tuple[loc, str]] lines){
+	map[str, list[loc]] textMap = ();
+	lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line && l1.path == l2.path};
+	
+	for (lineLocationPair <- lineLocationPairs) {
 		spanLocation = getSpan(lineLocationPair);
 		spanText = getSpanText(lines,spanLocation);
 		if (spanText in textMap) {
@@ -26,7 +38,10 @@ public rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
 			textMap += (spanText : [spanLocation]);
 		}
 	}
+	return textMap;
+}
 	
+rel[loc,loc] extractDuplicatesFromTextMap(map[str, list[loc]] textMap) { 	
 	duplicateTexts = (text : textMap[text] | text <- textMap, size(textMap[text]) > 1);
 		
 	rel[loc,loc] duplicateLocations = {};
@@ -37,7 +52,10 @@ public rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
     		duplicateLocations += <firstLoc, nextLoc>;
     	}
     }
-    
+    return duplicateLocations;
+}    
+
+rel[loc,loc] getIncludedSmallerDuplicates(rel[loc,loc] duplicateLocations) {
 	rel[loc,loc] subsetDuplicates = {};
 	for (<small1,small2> <- duplicateLocations, <big1,big2> <- duplicateLocations) {
 		if ((small1 < big1 || small1 < big2) && (small2 < big1 || small2 < big2)){
@@ -61,9 +79,8 @@ public rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
 			}
 			subsetDuplicates += <small1, small2>;
 		}
-    }	
-	
-	return duplicateLocations - subsetDuplicates;
+    }
+    return subsetDuplicates; 
 }
 
 public str getSpanText(list[tuple[loc, str]] lines, loc span) {
