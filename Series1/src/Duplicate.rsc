@@ -11,31 +11,31 @@ import Set;
 public loc smallSqlProject = |project://smallsql0.21_src|;
 
 public rel[loc,loc] findDuplicates(loc project) {
-	lines = getCleanedLinesForProject(project);
-	return getDuplicatesFromLines(lines);
+	pages = getCleanedFileLinesForProject(project);
+	return getDuplicatesFromLines(pages);
 }
 	
-rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
-	lines = [<lineLocation, text> | <lineLocation, text> <- lines, text != ""];
-	
-	textMap = makeTextMapFromLines(lines);
+rel[loc, loc] getDuplicatesFromLines(list[list[tuple[loc, str]]] fileLines) {	
+	textMap = makeTextMapFromLines(fileLines);
 	duplicateLocations = extractDuplicatesFromTextMap(textMap);
 	subsetDuplicates = getIncludedSmallerDuplicates(duplicateLocations);
 	
 	return duplicateLocations - subsetDuplicates;
 }
 
-map[str, list[loc]] makeTextMapFromLines(list[tuple[loc, str]] lines){
+map[str, list[loc]] makeTextMapFromLines(list[list[tuple[loc, str]]] fileLines){
 	map[str, list[loc]] textMap = ();
-	lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line && l1.path == l2.path};
-	
-	for (lineLocationPair <- lineLocationPairs) {
-		spanLocation = getSpan(lineLocationPair);
-		spanText = getSpanText(lines,spanLocation);
-		if (spanText in textMap) {
-			textMap[spanText] = textMap[spanText] + [spanLocation];
-		} else {		
-			textMap += (spanText : [spanLocation]);
+	for (lines <-fileLines){
+		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line && l1.path == l2.path};
+		
+		for (lineLocationPair <- lineLocationPairs) {
+			spanLocation = getSpan(lineLocationPair);
+			spanText = getSpanText(lines,spanLocation);
+			if (spanText in textMap) {
+				textMap[spanText] = textMap[spanText] + [spanLocation];
+			} else {		
+				textMap += (spanText : [spanLocation]);
+			}
 		}
 	}
 	return textMap;
@@ -101,12 +101,14 @@ public loc getSpan(tuple[loc, loc] locationPair){
 	return span(offset, length,<beginLine,0>,<endLine, endColumn>);
 }
 
-public list[tuple[loc, str]] getCleanedLinesForProject(loc project) {
-    lines = [];
+public list[list[tuple[loc, str]]] getCleanedFileLinesForProject(loc project) {
+    fileLines = [];
     for (file <- files(createM3FromEclipseProject(project))) {
-		lines += getCleanedLinesForFile(file);
+    	lines = getCleanedLinesForFile(file);
+    	lines = [<lineLocation, text> | <lineLocation, text> <- lines, text != ""];
+		fileLines += [lines];
 	}
-	return lines;
+	return fileLines;
 }
 
 public list[tuple[loc, str]] getCleanedLinesForFile(loc file) {
