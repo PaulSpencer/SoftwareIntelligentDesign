@@ -17,7 +17,7 @@ public rel[loc,loc] findDuplicates(loc project) {
 public rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
 	map[str, list[loc]] textMap = ();
 	lines = [<lineLocation, text> | <lineLocation, text> <- lines, text != ""];
-	for (lineLocationPair <- [<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line]) {
+	for (lineLocationPair <- [<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line && l1.path == l2.path]) {
 		spanLocation = getSpan(lineLocationPair);
 		spanText = getSpanText(lines,spanLocation);
 		if (spanText in textMap) {
@@ -27,17 +27,43 @@ public rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
 		}
 	}
 	
-	rel[loc,loc] duplicates = {};
-    for (text <- (text : textMap[text] | text <- textMap, size(textMap[text]) > 1)) {
+	duplicateTexts = (text : textMap[text] | text <- textMap, size(textMap[text]) > 1);
+		
+	rel[loc,loc] duplicateLocations = {};
+    for (text <- duplicateTexts) {
     	locations = textMap[text];
     	firstLoc = head(locations);
-    	for (nextLoc <- tail(locations)) {
-    		duplicates += <firstLoc, nextLoc>;
-    		println(nextLoc);
+    	for (nextLoc <- tail(locations)) {    		
+    		duplicateLocations += <firstLoc, nextLoc>;
     	}
     }
+    
+	rel[loc,loc] subsetDuplicates = {};
+	for (<small1,small2> <- duplicateLocations, <big1,big2> <- duplicateLocations) {
+		if ((small1 < big1 || small1 < big2) && (small2 < big1 || small2 < big2)){
+			if(small1 < big1) {
+				if (small1.path != big1.path){
+					continue;
+				}
+			} else {				
+				if (small1.path != big2.path){
+					continue;
+				}					
+			}
+			if(small2 < big1) {
+				if (small2.path != big1.path){
+					continue;
+				}			
+			} else {
+				if (small2.path != big2.path){
+					continue;
+				}			
+			}
+			subsetDuplicates += <small1, small2>;
+		}
+    }	
 	
-	return duplicates;
+	return duplicateLocations - subsetDuplicates;
 }
 
 public str getSpanText(list[tuple[loc, str]] lines, loc span) {

@@ -4,6 +4,7 @@ import Duplicate;
 import IO;
 
 // duplicates
+
 test bool exactMatch(){
 	duplicates = findDuplicates(|project://CodeWithDuplicates|);
 	fileLocation = |java+compilationUnit:///src/ClassWithDuplicates1.java|;
@@ -29,8 +30,18 @@ test bool matchWithCommentsAndBlankLines(){
 }
 
 test bool dontIncludeSmallerMatchIfBiggerAvailable(){
-	return true;
+	duplicates = findDuplicates(|project://CodeWithDuplicates|);
+	fileLocation = |java+compilationUnit:///src/ClassWithBigerDuplicates.java|;
+	firstBigLocation = fileLocation(45,89,<2,0>,<9,2>);
+	secondBigLocation = fileLocation(199,89,<14,0>,<21,2>);
+	
+	firstSmallerLocation = fileLocation(45,87,<2,0>,<8,8>);
+	secondSmallerLocation = fileLocation(199,87,<14,0>,<20,8>);
+	
+	return <firstBigLocation,secondBigLocation> in duplicates &&
+		<firstSmallerLocation,secondSmallerLocation> notin duplicates;
 }
+
 
 test bool dontMatch(){
 	duplicates = findDuplicates(|project://CodeWithDuplicates|);
@@ -39,6 +50,7 @@ test bool dontMatch(){
 	secondMethodLocation = fileLocation(178,47,<12,0>,<17,1>);
 	return <firstMethodLocation,secondMethodLocation> notin  duplicates;
 }
+
 
 // comment removal
 test bool removeCommentsEmptyReturnsEmpty(){
