@@ -29,7 +29,7 @@ test bool matchWithCommentsAndBlankLines(){
 	return <firstMethodLocation,secondMethodLocation> in  duplicates;
 }
 
-test bool dontIncludeSmallerMatchIfBiggerAvailable(){
+test bool dontIncludeSmallerMatchIfOnlyBiggerAvailable(){
 	duplicates = findDuplicates(|project://CodeWithDuplicates|);
 	fileLocation = |java+compilationUnit:///src/ClassWithBigerDuplicates.java|;
 	firstBigLocation = fileLocation(45,89,<2,0>,<9,2>);
@@ -41,6 +41,21 @@ test bool dontIncludeSmallerMatchIfBiggerAvailable(){
 	return <firstBigLocation,secondBigLocation> in duplicates &&
 		<firstSmallerLocation,secondSmallerLocation> notin duplicates;
 }
+
+
+test bool doIncludeSmallerMatchIfBiggerAndSmallerAvailable(){
+	duplicates = findDuplicates(|project://CodeWithDuplicates|);
+	fileLocation = |java+compilationUnit:///src/ClassWithBigerDuplicates.java|;
+	firstBigLocation = fileLocation(526,125,<40,0>,<50,1>);
+	secondBigLocation = fileLocation(355,125,<27,0>,<37,1>);
+	
+	firstSmallerLocation = fileLocation(526,91,<40,0>,<46,9>);
+	secondSmallerLocation = fileLocation(697,91,<53,0>,<59,9>);
+	
+	return <firstBigLocation,secondBigLocation> in duplicates &&
+		<firstSmallerLocation,secondSmallerLocation> in duplicates;
+}
+
 
 
 test bool dontMatch(){

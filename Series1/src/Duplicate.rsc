@@ -32,8 +32,8 @@ public rel[loc, loc] getDuplicatesFromLines(list[tuple[loc, str]] lines) {
 	rel[loc,loc] duplicateLocations = {};
     for (text <- duplicateTexts) {
     	locations = textMap[text];
-    	firstLoc = head(locations);
-    	for (nextLoc <- tail(locations)) {    		
+    	
+    	for (firstLoc <- locations, nextLoc <- locations, firstLoc != nextLoc) {    		
     		duplicateLocations += <firstLoc, nextLoc>;
     	}
     }
