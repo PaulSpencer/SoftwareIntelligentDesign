@@ -26,6 +26,7 @@ test bool matchWithCommentsAndBlankLines(){
 	fileLocation = |java+compilationUnit:///src/ClassWithDuplicates1.java|;
 	firstMethodLocation = fileLocation(39,70,<2,0>,<7,2>);
 	secondMethodLocation = fileLocation(410,112,<31,0>,<41,2>);
+	//secondMethodLocation = fileLocation(410,70,<31,0>,<36,2>);
 	return <firstMethodLocation,secondMethodLocation> in  duplicates;
 }
 
@@ -65,7 +66,6 @@ test bool dontMatch(){
 	secondMethodLocation = fileLocation(178,47,<12,0>,<17,1>);
 	return <firstMethodLocation,secondMethodLocation> notin  duplicates;
 }
-
 
 // comment removal
 test bool removeCommentsEmptyReturnsEmpty(){
@@ -111,6 +111,17 @@ test bool removeCommentsNotInMultilineNoStartTagStillNot(){
 test bool removeCommentsInMultilineNoEndTagTextGone(){
 	<_,cleaned> = removeComments(true, "whatever");
 	return cleaned == "";
+}
+
+test bool removeCommentsMultilineAtStartTurnsOnMultilne(){
+	<multilineFlag,_> = removeComments(false, " /*");
+	return multilineFlag == true;
+}
+
+
+test bool removeCommentsJavaDocsStartTurnsOnMultilne(){
+	<multilineFlag,_> = removeComments(false, " /**");
+	return multilineFlag == true;
 }
 
 test bool removeCommentsInMultilineHasEndTagNotInMultiline(){

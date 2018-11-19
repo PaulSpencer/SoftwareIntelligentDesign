@@ -14,12 +14,12 @@ public rel[loc,loc] findDuplicates(loc project) {
 	fileLines = getCleanedFileLinesForProject(project);
 	return getDuplicatesFromLines(fileLines);
 }
-//TODO: check if I am storing path correctly
 
 rel[loc, loc] getDuplicatesFromLines(set[list[tuple[loc, str]]] fileLines) {	
 	textMap = makeTextMapFromLines(fileLines);
 	duplicateLocations = extractDuplicatesFromTextMap(textMap);
 	subsetDuplicates = getIncludedSmallerDuplicates(duplicateLocations, fileLines);
+	
 	for(location <- duplicateLocations - subsetDuplicates) {
 		<l1,l2> = location;
 		println("-------------------");
@@ -28,6 +28,7 @@ rel[loc, loc] getDuplicatesFromLines(set[list[tuple[loc, str]]] fileLines) {
 		println("-------------------");
 		println("");
 	}
+	
 	return duplicateLocations - subsetDuplicates;
 }
 
@@ -37,16 +38,9 @@ map[str, list[loc]] makeTextMapFromLines(set[list[tuple[loc, str]]] fileLines){
 	
 	for (lines <-blocksWithDuplicateSingleLines){
 		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line};
-		
-	
-		
+			
 		for (lineLocationPair <- lineLocationPairs) {
 			<l1,l2> = lineLocationPair;
-			if(l1.path == "/src/smallsql/database/Column.java"  &&
-				l1.offset == 1400){
-				println("<l1>");		
-				println("<l2>");
-			}
 			spanLocation = getSpan(lineLocationPair);
 			spanText = getSpanText(lines,spanLocation);
 			if (spanText in textMap) {
@@ -59,27 +53,21 @@ map[str, list[loc]] makeTextMapFromLines(set[list[tuple[loc, str]]] fileLines){
 	return textMap;
 }
 
-
-	
 set[list[tuple[loc, str]]] breakOnUniqueLines(set[list[tuple[loc, str]]] fileLines) {
 	uniqueLines = getUniqueLines(fileLines);
-	fileSegment = [];
 	returnFileLines = {};
 	for (lines <- fileLines) {
+		fileSegment = [];
 		for (<lineLoc, lineText> <- lines) {
 			if(lineText in uniqueLines) {
-				if(!isEmpty(fileSegment)){ 
-					returnFileLines += {fileSegment};
-				}
+				returnFileLines += {fileSegment};
 				fileSegment = [];
 			} else {				
 				fileSegment += <lineLoc, lineText>;
 			}
 		}
-		if(!isEmpty(fileSegment)){
-			returnFileLines + {fileSegment};
-			fileSegment = [];
-		}
+		
+		returnFileLines += {fileSegment};			
 	}
 		
 	return returnFileLines;
@@ -87,18 +75,13 @@ set[list[tuple[loc, str]]] breakOnUniqueLines(set[list[tuple[loc, str]]] fileLin
 
 
 set[str] getUniqueLines(set[list[tuple[loc, str]]] fileLines){
-	
-	
 	allLinesList = [];
 	for (lineLocList <- fileLines) {
 		allLinesList += [LineText | <_,LineText> <- lineLocList];	
 	}
 	
     linesOnce = toList(toSet(allLinesList));
-    
-	
     duplicatedLines = toSet(allLinesList - linesOnce);
-    
     
     return toSet(linesOnce) - duplicatedLines;
 }
@@ -121,8 +104,6 @@ rel[loc,loc] extractDuplicatesFromTextMap(map[str, list[loc]] textMap) {
 
 rel[loc,loc] getIncludedSmallerDuplicates(rel[loc,loc] duplicateLocations,set[list[tuple[loc, str]]] fileLines) {
 	subsets = getSubSets(fileLines);
-	println("got subsets <size(subsets)>");
-	println("duplicate locations <size(duplicateLocations)>");
 	rel[loc,loc] subsetDuplicates = {};	
 
 	for (<l1, l2>  <- {<l1, l2>  | <l1, l2> <- duplicateLocations, l1 in subsets && l2 in subsets}) {
@@ -144,7 +125,7 @@ map[loc, set[loc]] getSubSets(set[list[tuple[loc, str]]] fileLines){
 	blocksWithDuplicateSingleLines = breakOnUniqueLines(fileLines);
 	
 	map[loc, set[loc]] subsets = ();
-	for (lines <-blocksWithDuplicateSingleLines){
+	for (lines <- blocksWithDuplicateSingleLines){
 		spans = {};
 		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line};
 		for (lineLocationPair <- lineLocationPairs) {
@@ -163,7 +144,7 @@ map[loc, set[loc]] getSubSets(set[list[tuple[loc, str]]] fileLines){
 }
 
 str getSpanText(list[tuple[loc, str]] lines, loc span) {
-	linesInSpan = [text | <line, text> <- lines, line <= span];
+	linesInSpan = [text | <line, text> <- lines, line <= span, text != ""];
 	allLines = intercalate("\n", linesInSpan);
 	return allLines;
 }
@@ -187,6 +168,7 @@ set[list[tuple[loc, str]]] getCleanedFileLinesForProject(loc project) {
     	lines = [<lineLocation, text> | <lineLocation, text> <- lines, text != ""];
 		fileLines += {lines};
 	}
+	
 	return fileLines;
 }
 
