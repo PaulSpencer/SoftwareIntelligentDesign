@@ -31,7 +31,7 @@ rel[loc, loc] getDuplicatesFromLines(set[list[tuple[loc, str]]] fileLines) {
 	textMap = makeTextMapFromLines(fileLines);
 	duplicateLocations = extractDuplicatesFromTextMap(textMap);
 	subsetDuplicates = getIncludedSmallerDuplicates(duplicateLocations, fileLines);
-	
+	/*
 	for(location <- duplicateLocations - subsetDuplicates) {
 		<l1,l2> = location;
 		println("-------------------");
@@ -40,7 +40,7 @@ rel[loc, loc] getDuplicatesFromLines(set[list[tuple[loc, str]]] fileLines) {
 		println("-------------------");
 		println("");
 	}
-	
+	*/
 	duplines = duplicateLocations - subsetDuplicates;
 	
 	println("out getDuplicatesFromLines");
@@ -56,7 +56,7 @@ map[str, list[loc]] makeTextMapFromLines(set[list[tuple[loc, str]]] fileLines){
 	blocksWithDuplicateSingleLines = breakOnUniqueLines(fileLines);
 	
 	for (lines <-blocksWithDuplicateSingleLines){
-		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line};
+		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line && l1.path == l2.path};
 			
 		for (lineLocationPair <- lineLocationPairs) {
 			<l1,l2> = lineLocationPair;
@@ -94,8 +94,11 @@ set[list[tuple[loc, str]]] breakOnUniqueLines(set[list[tuple[loc, str]]] fileLin
 			}
 		}
 		
-		returnFileLines += {fileSegment};			
+		returnFileLines += {fileSegment};		
 	}
+	
+	
+	
 	
 	
 	println("out breakOnUniqueLines");
@@ -182,24 +185,44 @@ map[loc, set[loc]] getSubSets(set[list[tuple[loc, str]]] fileLines){
 	map[loc, set[loc]] subsets = ();
 	for (lines <- blocksWithDuplicateSingleLines){
 		spans = {};
-		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line};
+		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line && l1.path == l2.path};
 		for (lineLocationPair <- lineLocationPairs) {
 			spanLocation = getSpan(lineLocationPair);
 			spanText = getSpanText(lines,spanLocation);
 			
 			if(size(findAll(spanText, "\n")) >= 5) {
-				spans += spanLocation;
+				spans += <spanLocation,size(findAll(spanText, "\n"))>;				 
 			}
 		}
 		
-		// this is too long -> rethink how to get the same
-		for(smaller <- spans, bigger <- spans, smaller < bigger){
-			if (smaller in subsets) {
-				subsets[smaller] = subsets[smaller] + {bigger};
-			} else {		
-				subsets += (smaller : {bigger});
+		if(size(spans) > 350) {
+			println("span count : <size(spans)>");
+		}
+		
+		smallerSpans = sort(spans, bool(tuple[loc,int] a, tuple[loc,int] b){ <_,a2> =a; <_,b2> = b;return a2 < b2; });
+		if(isEmpty(smallerSpans)){
+			continue;
+		}
+		<_, smallestSize> = head(smallerSpans);
+		biggerSpans = {<location,count> | <location,count> <- smallerSpans, count > smallestSize};
+
+		for(<smaller,scnt> <- spans){
+			if (scnt > smallestSize) {
+				biggerSpans = {<location,count> | <location,count> <- smallerSpans, count > smallestSize};
+				smallestSize = scnt;
+			}
+			
+			for (<bigger,_> <- biggerSpans){
+				if (smaller < bigger){
+					if (smaller in subsets) {
+						subsets[smaller] = subsets[smaller] + {bigger};
+					} else {		
+						subsets += (smaller : {bigger});
+					}
+				}
 			}			
 		}
+		
 	}
 	
 	println("out getSubSets");
@@ -242,12 +265,21 @@ set[list[tuple[loc, str]]] getCleanedFileLinesForProject(loc project) {
 }
 
 list[tuple[loc, str]] getCleanedLinesForFile(loc file) {
-	lines = [];
+	lines  = [];
+	fullText = readFile(file);
+	fileLines = readFileLines(file);
+	firstline = fileLines[0];
+	fullText = substring(fullText,size(firstline));
+	eolSize = 1;
+	if (fullText[0] == "\r" && fullText[1] == "\n") {
+		eolSize = 2;
+	}
+	
 	linenr=0;
 	offset=0;
 	isInMultilineComment = false;
 	for (line <- readFileLines(file)) {
-		<linenr, offset, location> = getLineLocation(linenr, offset, file, line);
+		<linenr, offset, location> = getLineLocation(linenr, offset, file, line,eolSize);
 		<isInMultilineComment, line> = removeComments(isInMultilineComment, line);
 		line = trim(line);
 		lines += <location, line>;
@@ -255,11 +287,11 @@ list[tuple[loc, str]] getCleanedLinesForFile(loc file) {
 	return lines;
 }
 
-tuple[int, int, loc] getLineLocation(int linenr, int offset, loc file, str line) {
+tuple[int, int, loc] getLineLocation(int linenr, int offset, loc file, str line, int eolSize) {
     firstPart =|java+compilationUnit:///| + file.path;	
     length = size(line);
     lineLocation = firstPart(offset,length+1,<linenr,0>,<linenr,length>);
-	return <linenr + 1, offset + length +2, lineLocation>;
+    return <linenr + 1, offset + length +eolSize, lineLocation>;
 }
 
 list[int] getQuotes(str line){
