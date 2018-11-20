@@ -9,6 +9,7 @@ import Map;
 import Set;
 
 public loc smallSqlProject = |project://smallsql0.21_src|;
+public loc hsqldbProject = |project://hsqldb-2.3.1|;
 
 public rel[loc,loc] findDuplicates(loc project) {
 	fileLines = getCleanedFileLinesForProject(project);
@@ -43,10 +44,12 @@ map[str, list[loc]] makeTextMapFromLines(set[list[tuple[loc, str]]] fileLines){
 			<l1,l2> = lineLocationPair;
 			spanLocation = getSpan(lineLocationPair);
 			spanText = getSpanText(lines,spanLocation);
-			if (spanText in textMap) {
-				textMap[spanText] = textMap[spanText] + [spanLocation];
-			} else {		
-				textMap += (spanText : [spanLocation]);
+			if(size(findAll(spanText, "\n")) >= 5) {
+				if (spanText in textMap) {
+					textMap[spanText] = textMap[spanText] + [spanLocation];
+				} else {		
+					textMap += (spanText : [spanLocation]);
+				}
 			}
 		}
 	}
@@ -75,15 +78,21 @@ set[list[tuple[loc, str]]] breakOnUniqueLines(set[list[tuple[loc, str]]] fileLin
 
 
 set[str] getUniqueLines(set[list[tuple[loc, str]]] fileLines){
-	allLinesList = [];
-	for (lineLocList <- fileLines) {
-		allLinesList += [LineText | <_,LineText> <- lineLocList];	
-	}
+	map[str,bool] uniqueLineMap = ();
 	
-    linesOnce = toList(toSet(allLinesList));
-    duplicatedLines = toSet(allLinesList - linesOnce);
+	for (lineLocList <- fileLines) {
+		for(<_,lineText> <- lineLocList){
+			if(lineText notin uniqueLineMap){
+				uniqueLineMap += (lineText : true);
+			} else {
+				uniqueLineMap[lineText] = false;
+			}
+		}	
+	}
     
-    return toSet(linesOnce) - duplicatedLines;
+    uniqueLines = {text | text <- uniqueLineMap, uniqueLineMap[text] == true};
+    
+    return uniqueLines;
 }
 
 
@@ -129,7 +138,12 @@ map[loc, set[loc]] getSubSets(set[list[tuple[loc, str]]] fileLines){
 		spans = {};
 		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line};
 		for (lineLocationPair <- lineLocationPairs) {
-			spans += getSpan(lineLocationPair);
+			spanLocation = getSpan(lineLocationPair);
+			spanText = getSpanText(lines,spanLocation);
+			
+			if(size(findAll(spanText, "\n")) >= 5) {
+				spans += spanLocation;
+			}
 		}
 				
 		for(smaller <- spans, bigger <- spans, smaller < bigger){
