@@ -6,8 +6,15 @@ import lang::java::jdt::m3::Core;
 import IO;
 import String;
 import List;
+import Duplicate;
 
 public loc smallSqlProject = |project://smallsql0.21_src|;
+
+public loc hsqldbProject = |project://hsqldb-2.3.1|;
+
+public void outputDuplicates(loc project){
+	writeCSV(findDuplicates(project),|file:///C:/temp/pauldups.csv|);
+}
 
 public void outputCyclometricComplexity(loc project){
   rel[loc, int] metrics = {};

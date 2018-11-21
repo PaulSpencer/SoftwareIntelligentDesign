@@ -188,17 +188,41 @@ map[loc, set[loc]] getSubSets(set[list[tuple[loc, str]]] fileLines){
 			spanText = getSpanText(lines,spanLocation);
 			
 			if(size(findAll(spanText, "\n")) >= 5) {
-				spans += spanLocation;
+				spans += <spanLocation,size(findAll(spanText, "\n"))>;
 			}
 		}
-		
+		if(isEmpty(spans)){
+			continue;
+		}
+		if(size(spans) > 1500){
+			println("span count : <size(spans)>");
+			println("span start <now()>");
+		}
 		// this is too long -> rethink how to get the same
-		for(smaller <- spans, bigger <- spans, smaller < bigger){
-			if (smaller in subsets) {
-				subsets[smaller] = subsets[smaller] + {bigger};
-			} else {		
-				subsets += (smaller : {bigger});
-			}			
+		smallerSpans = sort(spans, bool(tuple[loc,int] a, tuple[loc,int] b){ <_,a2> =a; <_,b2> = b;return a2 < b2; });
+		<_, smallestSize> = head(smallerSpans);
+		
+		biggerSpans = {<location,count> | <location,count> <- smallerSpans, count > smallestSize};
+		
+		for(<smaller,scount> <- smallerSpans){
+			if(scount > smallestSize){				
+				smallestSize = scount;
+				biggerSpans = {<location,count> | <location,count> <- biggerSpans, count > smallestSize};				
+			}
+			
+			for (<bigger,_> <- biggerSpans){
+				if (smaller < bigger) {
+					if (smaller in subsets) {
+						subsets[smaller] = subsets[smaller] + {bigger};
+					} else {		
+						subsets += (smaller : {bigger});
+					}		
+				}
+			}	
+		}
+		
+		if(size(spans) > 1500){
+			println("span end <now()>");
 		}
 	}
 	
