@@ -13,45 +13,18 @@ public loc smallSqlProject = |project://smallsql0.21_src|;
 public loc hsqldbProject = |project://hsqldb-2.3.1|;
 
 public rel[loc,loc] findDuplicates(loc project) {
-	println("in findDuplicates");
-	println("<now()>");
-	
 	fileLines = getCleanedFileLinesForProject(project);
-	duplines =  getDuplicatesFromLines(fileLines);
-	
-	println("out findDuplicates");
-	println("<now()>");
-	
-	return duplines;
+	return getDuplicatesFromLines(fileLines);
 }
 
 rel[loc, loc] getDuplicatesFromLines(set[list[tuple[loc, str]]] fileLines) {
-	println("in getDuplicatesFromLines");
-	println("<now()>");	
 	textMap = makeTextMapFromLines(fileLines);
 	duplicateLocations = extractDuplicatesFromTextMap(textMap);
 	subsetDuplicates = getIncludedSmallerDuplicates(duplicateLocations, fileLines);
-	
-	for(location <- duplicateLocations - subsetDuplicates) {
-		<l1,l2> = location;
-		println("-------------------");
-		println("<l1>");
-		println("<l2>");
-		println("-------------------");
-		println("");
-	}
-	
-	duplines = duplicateLocations - subsetDuplicates;
-	
-	println("out getDuplicatesFromLines");
-	println("<now()>");
-	
-	return duplines;
+	return duplicateLocations - subsetDuplicates;
 }
 
 map[str, list[loc]] makeTextMapFromLines(set[list[tuple[loc, str]]] fileLines){
-	println("in makeTextMapFromLines");
-	println("<now()>");
 	map[str, list[loc]] textMap = ();
 	blocksWithDuplicateSingleLines = breakOnUniqueLines(fileLines);
 	
@@ -72,15 +45,10 @@ map[str, list[loc]] makeTextMapFromLines(set[list[tuple[loc, str]]] fileLines){
 		}
 	}
 	
-	println("out makeTextMapFromLines");
-	println("<now()>");
-	
 	return textMap;
 }
 
 set[list[tuple[loc, str]]] breakOnUniqueLines(set[list[tuple[loc, str]]] fileLines) {
-	println("in breakOnUniqueLines");
-	println("<now()>");
 	uniqueLines = getUniqueLines(fileLines);
 	returnFileLines = {};
 	for (lines <- fileLines) {
@@ -96,18 +64,12 @@ set[list[tuple[loc, str]]] breakOnUniqueLines(set[list[tuple[loc, str]]] fileLin
 		
 		returnFileLines += {fileSegment};			
 	}
-	
-	
-	println("out breakOnUniqueLines");
-	println("<now()>");
 		
 	return returnFileLines;
 }
 
 
 set[str] getUniqueLines(set[list[tuple[loc, str]]] fileLines){
-	println("in getUniqueLines");
-	println("<now()>");
 	map[str,bool] uniqueLineMap = ();
 	
 	for (lineLocList <- fileLines) {
@@ -120,19 +82,12 @@ set[str] getUniqueLines(set[list[tuple[loc, str]]] fileLines){
 		}	
 	}
     
-    uniqueLines = {text | text <- uniqueLineMap, uniqueLineMap[text] == true};
-    
-	println("out getUniqueLines");
-	println("<now()>");
-	
-    return uniqueLines;
+    return {text | text <- uniqueLineMap, uniqueLineMap[text] == true};
 }
 
 
 
 rel[loc,loc] extractDuplicatesFromTextMap(map[str, list[loc]] textMap) { 	
-	println("in extractDuplicatesFromTextMap");
-	println("<now()>");
 	duplicateTexts = (text : textMap[text] | text <- textMap, size(textMap[text]) > 1);
 
 	rel[loc,loc] duplicateLocations = {};
@@ -143,16 +98,11 @@ rel[loc,loc] extractDuplicatesFromTextMap(map[str, list[loc]] textMap) {
     		duplicateLocations += <firstLoc, nextLoc>;
     	}
     }
-    
-	println("out extractDuplicatesFromTextMap");
-	println("<now()>");
 	
     return duplicateLocations;
 }    
 
 rel[loc,loc] getIncludedSmallerDuplicates(rel[loc,loc] duplicateLocations,set[list[tuple[loc, str]]] fileLines) {
-	println("in getIncludedSmallerDuplicates");
-	println("<now()>");
 	subsets = getSubSets(fileLines);
 	rel[loc,loc] subsetDuplicates = {};	
 
@@ -167,16 +117,11 @@ rel[loc,loc] getIncludedSmallerDuplicates(rel[loc,loc] duplicateLocations,set[li
 			}
 		}		
 	}
-	
-	println("out getIncludedSmallerDuplicates");
-	println("<now()>");
-	
+
     return subsetDuplicates; 
 }
 
 map[loc, set[loc]] getSubSets(set[list[tuple[loc, str]]] fileLines){
-	println("in getSubSets");
-	println("<now()>");
 	blocksWithDuplicateSingleLines = breakOnUniqueLines(fileLines);
 	
 	map[loc, set[loc]] subsets = ();
@@ -194,10 +139,7 @@ map[loc, set[loc]] getSubSets(set[list[tuple[loc, str]]] fileLines){
 		if(isEmpty(spans)){
 			continue;
 		}
-		if(size(spans) > 1500){
-			println("span count : <size(spans)>");
-			println("span start <now()>");
-		}
+
 		// this is too long -> rethink how to get the same
 		smallerSpans = sort(spans, bool(tuple[loc,int] a, tuple[loc,int] b){ <_,a2> =a; <_,b2> = b;return a2 < b2; });
 		<_, smallestSize> = head(smallerSpans);
@@ -220,15 +162,7 @@ map[loc, set[loc]] getSubSets(set[list[tuple[loc, str]]] fileLines){
 				}
 			}	
 		}
-		
-		if(size(spans) > 1500){
-			println("span end <now()>");
-		}
 	}
-	
-	println("out getSubSets");
-	println("<now()>");
-	
 	return subsets;
 }
 
@@ -251,8 +185,6 @@ loc getSpan(tuple[loc, loc] locationPair){
 }
 
 set[list[tuple[loc, str]]] getCleanedFileLinesForProject(loc project) {
-	println("in getCleanedFileLinesForProject");
-	println("<now()>");
 	fileLines = {};
     for (file <- files(createM3FromEclipseProject(project))) {
     	lines = getCleanedLinesForFile(file);
@@ -260,8 +192,6 @@ set[list[tuple[loc, str]]] getCleanedFileLinesForProject(loc project) {
 		fileLines += {lines};
 	}
 	
-	println("out getCleanedFileLinesForProject");
-	println("<now()>");
 	return fileLines;
 }
 
