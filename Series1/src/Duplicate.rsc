@@ -13,20 +13,50 @@ public loc smallSqlProject = |project://smallsql0.21_src|;
 public loc hsqldbProject = |project://hsqldb-2.3.1|;
 
 public rel[loc,loc] findDuplicates(loc project) {
+	println("Start");
+	println("<now()>");
+	
 	fileLines = getCleanedFileLinesForProject(project);
-	return getDuplicatesFromLines(fileLines);
+	println("got cleaned lines");
+	println("<now()>");
+	dups = getDuplicatesFromLines(fileLines);
+	previousPath = "";
+	previousOffset = -1;
+	previousLength = -1;
+	sort(dups, bool(tuple[loc,loc] a, tuple[loc,loc] b){ <locA,_> = a; <locB,_> = b ; return locA.path > locB.path || locA.offset > locB.offset || locA.length > locB.length; });
+	for (<l1,l2> <- dups){
+		sameL1 = l1.path == previousPath;
+		sameL1 = sameL1 && l1.offset == previousOffset;
+		sameL1 = sameL1 && l1.length == previousLength; 
+		if (!sameL1) {
+			println();println();println();
+			println("-------------");
+			println("<l1>");
+			println("...");
+			println(readFile(l1));
+			println("...");
+			println("is Equal to: ");			
+			println("<l2>");
+			println("...");
+			println(readFile(l2));
+			println("...");
+		} else {
+			println("and");
+			println("<l2>");
+			println("...");
+			println(readFile(l2));
+			println("...");
+		}
+	}
+	return dups;
 }
 
 rel[loc, loc] getDuplicatesFromLines(set[list[tuple[loc, str]]] fileLines) {
-	textMap = makeTextMapFromLines(fileLines);
-	duplicateLocations = extractDuplicatesFromTextMap(textMap);
-	subsetDuplicates = getIncludedSmallerDuplicates(duplicateLocations, fileLines);
-	return duplicateLocations - subsetDuplicates;
-}
-
-map[str, list[loc]] makeTextMapFromLines(set[list[tuple[loc, str]]] fileLines){
 	map[str, list[loc]] textMap = ();
+	map[str, int] textlineCount = ();
 	blocksWithDuplicateSingleLines = breakOnUniqueLines(fileLines);
+	println("got unique lines");
+	println("<now()>");
 	
 	for (lines <-blocksWithDuplicateSingleLines){
 		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line};
@@ -35,17 +65,104 @@ map[str, list[loc]] makeTextMapFromLines(set[list[tuple[loc, str]]] fileLines){
 			<l1,l2> = lineLocationPair;
 			spanLocation = getSpan(lineLocationPair);
 			spanText = getSpanText(lines,spanLocation);
-			if(size(findAll(spanText, "\n")) >= 5) {
+			lineCount = size(findAll(spanText, "\n \b"));
+			if(lineCount >= 5) {
 				if (spanText in textMap) {
-					textMap[spanText] = textMap[spanText] + [spanLocation];
+					textMap[spanText] = textMap[spanText] + [spanLocation];	
+					if (spanText notin textlineCount)	{		
+						textlineCount += (spanText : lineCount);
+					}
 				} else {		
 					textMap += (spanText : [spanLocation]);
 				}
 			}
 		}
 	}
+
+	textMap = (text : textMap[text] | text <- textMap, size(textMap[text]) > 1);
+
+	println("created text map");
+	println("<now()>");
 	
-	return textMap;
+	
+	duplicateLocations = extractDuplicatesFromTextMap(textMap);
+	
+	println("got duplicate locations map");
+	println("<now()>");
+	
+	lineCounts = toList(toSet([textlineCount[text] | text <- textlineCount]));
+	lineCounts = sort(lineCounts, bool(int a, int b) { return a > b; });
+	println("line counts: <lineCounts>");
+	map[str, set[str]] subsetTexts = ();
+	for (lineCount <- reverse(tail(reverse(lineCounts)))) {
+		println("linecoutn: <lineCount>");
+		for (text <- textlineCount,  textlineCount[text] == lineCount){
+			if (text notin textMap) {
+				continue;
+			}
+			minusFirstLine = substring(text, findFirst(text,"\n \b")+3);
+			minusLastLine = substring(text, 0, findLast(text,"\n \b"));
+			
+			if(minusFirstLine in textMap) {
+				if (minusFirstLine in subsetTexts) {
+					subsetTexts[minusFirstLine] = subsetTexts[minusFirstLine] + text;
+				} else {
+					subsetTexts += (minusFirstLine : {text});
+				}
+			}
+			
+			if(minusLastLine in textMap) {
+				if (minusLastLine in subsetTexts) {
+					subsetTexts[minusLastLine] = subsetTexts[minusLastLine] + text;
+				} else {
+					subsetTexts += (minusLastLine : {text});
+				}
+			}
+		}
+	}
+	
+	println("got subset texts");
+	println("<now()>");
+	
+	map[loc, set[loc]] subsetLocs = ();
+	for	(subsetText <- subsetTexts) {
+		for (supersetText <- subsetTexts[subsetText]){
+			for (subset <- textMap[subsetText], superset <-textMap[supersetText]){
+				if (subset.path == superset.path && subset < superset) {
+					if (subset in subsetLocs) {
+						subsetLocs[subset] = subsetLocs[subset] + superset;
+					} else {
+						subsetLocs += (subset : {superset});
+					}
+				}
+			}
+		}
+	}
+	
+	println("got possible subsets");
+	println("<now()>");
+	
+	
+	rel[loc,loc] subsetDuplicates = {};	
+
+	for (<l1, l2>  <- {<l1, l2>  | <l1, l2> <- duplicateLocations, l1 in subsetLocs && l2 in subsetLocs}) {
+
+		l1Sets = subsetLocs[l1];
+		l2Sets = subsetLocs[l2];
+	
+		for (l1Bigger <- l1Sets, l2Bigger <- l2Sets){
+			if (<l1Bigger, l2Bigger> in duplicateLocations){
+				subsetDuplicates += <l1, l2>;
+			}
+		}		
+	}	
+	
+	println("got actual subsets");
+	println("<now()>");
+	
+		
+	
+	return duplicateLocations - subsetDuplicates;
 }
 
 set[list[tuple[loc, str]]] breakOnUniqueLines(set[list[tuple[loc, str]]] fileLines) {
@@ -85,8 +202,6 @@ set[str] getUniqueLines(set[list[tuple[loc, str]]] fileLines){
     return {text | text <- uniqueLineMap, uniqueLineMap[text] == true};
 }
 
-
-
 rel[loc,loc] extractDuplicatesFromTextMap(map[str, list[loc]] textMap) { 	
 	duplicateTexts = (text : textMap[text] | text <- textMap, size(textMap[text]) > 1);
 
@@ -94,8 +209,10 @@ rel[loc,loc] extractDuplicatesFromTextMap(map[str, list[loc]] textMap) {
     for (text <- duplicateTexts) {
     	locations = textMap[text];
     	
-    	for (firstLoc <- locations, nextLoc <- locations, firstLoc != nextLoc) {    		
-    		duplicateLocations += <firstLoc, nextLoc>;
+    	for (firstLoc <- locations, nextLoc <- locations, firstLoc != nextLoc) {
+    		if(<nextLoc, firstLoc> notin duplicateLocations) {
+    			duplicateLocations += <firstLoc, nextLoc>;
+    		}
     	}
     }
 	
@@ -121,10 +238,12 @@ rel[loc,loc] getIncludedSmallerDuplicates(rel[loc,loc] duplicateLocations,set[li
     return subsetDuplicates; 
 }
 
-map[loc, set[loc]] getSubSets(set[list[tuple[loc, str]]] fileLines){
-	blocksWithDuplicateSingleLines = breakOnUniqueLines(fileLines);
+map[loc, set[loc]] getSubSets(){
 	
 	map[loc, set[loc]] subsets = ();
+	/*
+	blocksWithDuplicateSingleLines = breakOnUniqueLines(fileLines);
+	
 	for (lines <- blocksWithDuplicateSingleLines){
 		spans = {};
 		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line};
@@ -132,8 +251,8 @@ map[loc, set[loc]] getSubSets(set[list[tuple[loc, str]]] fileLines){
 			spanLocation = getSpan(lineLocationPair);
 			spanText = getSpanText(lines,spanLocation);
 			
-			if(size(findAll(spanText, "\n")) >= 5) {
-				spans += <spanLocation,size(findAll(spanText, "\n"))>;
+			if(size(findAll(spanText, "\n \b")) >= 5) {
+				spans += <spanLocation,size(findAll(spanText, "\n \b"))>;
 			}
 		}
 		if(isEmpty(spans)){
@@ -163,12 +282,14 @@ map[loc, set[loc]] getSubSets(set[list[tuple[loc, str]]] fileLines){
 			}	
 		}
 	}
+	
+	*/
 	return subsets;
 }
 
 str getSpanText(list[tuple[loc, str]] lines, loc span) {
 	linesInSpan = [text | <line, text> <- lines, line <= span, text != ""];
-	allLines = intercalate("\n", linesInSpan);
+	allLines = intercalate("\n \b", linesInSpan);
 	return allLines;
 }
 
@@ -197,11 +318,19 @@ set[list[tuple[loc, str]]] getCleanedFileLinesForProject(loc project) {
 
 list[tuple[loc, str]] getCleanedLinesForFile(loc file) {
 	lines = [];
+	fullText = readFile(file);
+	fileLines = readFileLines(file);
+	firstline = fileLines[0];
+	fullText = substring(fullText,size(firstline));
+	eolSize = 1;
+	if (fullText[0] == "\r" && fullText[1] == "\n") {
+		eolSize = 2;
+	}
 	linenr=0;
 	offset=0;
 	isInMultilineComment = false;
 	for (line <- readFileLines(file)) {
-		<linenr, offset, location> = getLineLocation(linenr, offset, file, line);
+		<linenr, offset, location> = getLineLocation(linenr, offset, file, line, eolSize);
 		<isInMultilineComment, line> = removeComments(isInMultilineComment, line);
 		line = trim(line);
 		lines += <location, line>;
@@ -209,11 +338,11 @@ list[tuple[loc, str]] getCleanedLinesForFile(loc file) {
 	return lines;
 }
 
-tuple[int, int, loc] getLineLocation(int linenr, int offset, loc file, str line) {
+tuple[int, int, loc] getLineLocation(int linenr, int offset, loc file, str line, int eolSize) {
     firstPart =|java+compilationUnit:///| + file.path;	
     length = size(line);
     lineLocation = firstPart(offset,length+1,<linenr,0>,<linenr,length>);
-	return <linenr + 1, offset + length +2, lineLocation>;
+	return <linenr + 1, offset + length + eolSize, lineLocation>;
 }
 
 list[int] getQuotes(str line){
