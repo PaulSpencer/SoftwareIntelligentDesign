@@ -6,6 +6,7 @@ import IO;
 import Set;
 import lang::csv::IO;
 import List;
+import Map;
 
 test bool emptyFile(){
 	rel[loc tp, int nm] methodSet = {}; 
@@ -50,6 +51,48 @@ public void wExcel(){
 	methodSet = countLinesPerMethod(myProjectFile);
 	writeCSV(methodSet, |file:///E:/metr.csv|);
 }
+
+public void wExcel2(){
+	rel[loc tp, int nm] methodSet = {}; 
+	//myProjectFile = |project://smallsql0.21_src|;
+	myProjectFile = |project://hsqldb-2.3.1|;
+	methodSet = countLinesPerMethod(myProjectFile);
+	c = 0;
+	for (s<-methodSet){
+		c += s.nm;
+	}
+	//writeCSV(methodSet, |file:///E:/small.csv|);
+	//println("The number of lines of all methods is:");
+	//println(c);
+	methodSizeToMap(methodSet);
+}
+
+ public void methodSizeToMap(rel[loc, int] methodSet){
+ 	rel[loc tp, int nm] MyMethodSet = {};
+ 	MyMethodSet = methodSet; 
+	map [str, int] methodDist = ("l":0,"m":0,"h":0,"vh":0);	
+	for(s<-MyMethodSet){
+		if(s.nm <= 30 ){
+			methodDist["l"] += s.nm;	
+		}
+		if(s.nm > 30 && s.nm <= 44){
+			methodDist["m"] += s.nm;
+		}
+		if(s.nm > 44 && s.nm <= 74){
+			methodDist["h"] += s.nm;
+		}
+		if(s.nm > 74){
+			methodDist["vh"] += s.nm;
+		}
+	} 
+	println(methodDist);
+}
+
+
+
+
+
+
 
 test bool singleLineMethod(){
 	rel[loc tp, int nm] methodSet = {}; 
