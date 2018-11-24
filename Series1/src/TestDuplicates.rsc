@@ -1,6 +1,7 @@
 module TestDuplicates
 
 import Duplicate;
+import LineCleaner;
 import IO;
 
 // duplicates
@@ -10,7 +11,8 @@ test bool exactMatch(){
 	fileLocation = |java+compilationUnit:///src/ClassWithDuplicates1.java|;
 	firstMethodLocation = fileLocation(39,70,<2,0>,<7,2>);
 	secondMethodLocation = fileLocation(152,70,<11,0>,<16,2>);
-	return <firstMethodLocation,secondMethodLocation> in  duplicates;
+	return <firstMethodLocation,secondMethodLocation> in  duplicates ||
+		<secondMethodLocation,firstMethodLocation> in  duplicates;
 }
 
 test bool exactMatch2(){
@@ -18,7 +20,8 @@ test bool exactMatch2(){
 	fileLocation = |java+compilationUnit:///src/ClassWithDuplicates1.java|;
 	firstMethodLocation = fileLocation(39,70,<2,0>,<7,2>);
 	secondMethodLocation = fileLocation(281,70,<21,0>,<26,2>);
-	return <firstMethodLocation,secondMethodLocation> in  duplicates;
+	return <firstMethodLocation,secondMethodLocation> in  duplicates ||
+		<secondMethodLocation,firstMethodLocation> in  duplicates;
 }
 
 test bool matchWithCommentsAndBlankLines(){
@@ -26,8 +29,8 @@ test bool matchWithCommentsAndBlankLines(){
 	fileLocation = |java+compilationUnit:///src/ClassWithDuplicates1.java|;
 	firstMethodLocation = fileLocation(39,70,<2,0>,<7,2>);
 	secondMethodLocation = fileLocation(410,112,<31,0>,<41,2>);
-	//secondMethodLocation = fileLocation(410,70,<31,0>,<36,2>);
-	return <firstMethodLocation,secondMethodLocation> in  duplicates;
+	return <firstMethodLocation,secondMethodLocation> in  duplicates ||
+		<secondMethodLocation,firstMethodLocation> in  duplicates;
 }
 
 test bool dontIncludeSmallerMatchIfOnlyBiggerAvailable(){
@@ -39,8 +42,12 @@ test bool dontIncludeSmallerMatchIfOnlyBiggerAvailable(){
 	firstSmallerLocation = fileLocation(45,87,<2,0>,<8,8>);
 	secondSmallerLocation = fileLocation(199,87,<14,0>,<20,8>);
 	
-	return <firstBigLocation,secondBigLocation> in duplicates &&
-		<firstSmallerLocation,secondSmallerLocation> notin duplicates;
+	return (<firstBigLocation,secondBigLocation> in duplicates ||
+		<secondBigLocation,firstBigLocation> in duplicates)
+	 	&&
+		<firstSmallerLocation,secondSmallerLocation> notin duplicates
+		&&
+		<secondSmallerLocation,firstSmallerLocation> notin duplicates;
 }
 
 
@@ -53,8 +60,11 @@ test bool doIncludeSmallerMatchIfBiggerAndSmallerAvailable(){
 	firstSmallerLocation = fileLocation(526,91,<40,0>,<46,9>);
 	secondSmallerLocation = fileLocation(697,91,<53,0>,<59,9>);
 	
-	return <firstBigLocation,secondBigLocation> in duplicates &&
-		<firstSmallerLocation,secondSmallerLocation> in duplicates;
+	return (<firstBigLocation,secondBigLocation> in duplicates ||
+		<secondBigLocation,firstBigLocation> in duplicates)	
+		&&
+		(<firstSmallerLocation,secondSmallerLocation> in duplicates ||
+		<secondSmallerLocation,firstSmallerLocation> in duplicates);
 }
 
 

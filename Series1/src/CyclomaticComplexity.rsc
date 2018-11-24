@@ -1,16 +1,29 @@
 module CyclomaticComplexity
 
-import lang::java::jdt::m3::AST; 
-import IO;
-import List;
+import lang::java::jdt::m3::Core;
+import lang::java::m3::AST;
+
+public loc smallSqlProject = |project://smallsql0.21_src|;
+public loc hsqldbProject = |project://hsqldb-2.3.1|;
+
+public rel[loc, int]  calculateComplexityForProject(loc project){
+  rel[loc, int] metrics = {};
+  locations = [ file | file <- files(createM3FromEclipseProject(project))];
+  for(location <- locations){
+    metrics += calculateComplexity(location);
+  }
+  
+  return metrics;
+}
 
 public rel[loc, int] calculateComplexity(loc location) {
+	asts = createAstFromFile(location, true);
     metric = {};
-	for(/method(_, _, _, _, Statement impl, decl=methodLocation) := createAstFromFile(location, true)){
+	for(/method(_, _, _, _, Statement impl, decl=methodLocation) := asts){
 	    metric += <methodLocation, calculateMethodComplexity(impl)>;
 	}
 	
-    for(/constructor(_, _, _, Statement impl, decl=constructorLocation) := createAstFromFile(location, true)){
+    for(/constructor(_, _, _, Statement impl, decl=constructorLocation) := asts){
 	    metric += <constructorLocation, calculateMethodComplexity(impl)>;
 	}
 	return metric;
@@ -30,7 +43,8 @@ public int calculateMethodComplexity(Statement statement){
     	case \catch(_,_) : complexity += 1;    	
 		case \infix(_, "||",_) : complexity += 1;
 		case \infix(_, "&&",_) : complexity += 1;
-		case \switch(_, statements) : complexity += casesNoFallThrough(statements);
+		case \case(_) : complexity += 1;
+		//case \switch(_, statements) : complexity += casesNoFallThrough(statements);
     }
     return complexity;
 }

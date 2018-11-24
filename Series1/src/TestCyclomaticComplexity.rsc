@@ -126,20 +126,6 @@ test bool caseDoesnotCountFallThroughUnlessAllEmpty(){
 	return complexityFromMethod("fallThroughCaseNoBreakMethod",2);
 }
 
-/*
-test bool switchInSwitchEdgeCase(){
-	println();
-	println("--------------");
-	println();
-	println("Edge Case : ");
-	println();
-
-	return complexityFromEdgeCases("convertExpressionIfNeeded",7);
-
-}
-*/
-
-
 bool complexityFromMethod(str methodName, int expectedComplexity){
 	return complexityFromMethodBase("ClassWithComplexityMethods", methodName, expectedComplexity);
 }

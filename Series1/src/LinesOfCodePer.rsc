@@ -1,10 +1,16 @@
 module LinesOfCodePer
 
 import lang::java::jdt::m3::Core;
-import LinesOfCode;
 import Relation;
 import IO;
+import List;
+import LineCleaner;
 
+
+public int countLinesPerProject(loc prj){
+	myModel = createM3FromEclipseProject(prj);
+	return (0 | it + linesOfCode(file) | file <- files(myModel));
+}
 
 public rel[loc, int] countLinesPerMethod(loc prj){
 	myModel = createM3FromEclipseProject(prj);
@@ -12,10 +18,9 @@ public rel[loc, int] countLinesPerMethod(loc prj){
 	return {<method, linesOfCode(method)> | method <- methods(myModel)};
 }
 
-public rel[loc, int] countLinesPerFile(loc fl){
-	myModel = createM3FromEclipseProject(fl);
-	myMethods = methods({fl});
-	return {<fl, linesOfCode(myMethods)>};
+int linesOfCode(loc location){
+	allLines = size(readFileLines(location));
+	emptyLines = (0 | it +1| <_,text> <- getCleanedLinesForFile(location), text == "");
+
+	return allLines - emptyLines;
 }
-
-
