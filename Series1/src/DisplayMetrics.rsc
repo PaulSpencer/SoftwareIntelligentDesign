@@ -19,12 +19,12 @@ public void displayMetricsForProject(loc project){
 	projectLoc = countLinesPerProject(project);
 	println("Volume (total Lines of Code) : <projectLoc>");
 	println();
-	println(getMethodSizeSummary(project));
-	println();
-	println(getCyclomaticComplexitySummary(project));
-	println();
-	duplicateLineCount = getTotalDuplicatedLines(project);
-	println("Duplicate lines (6+) Total: <duplicateLineCount> (<percent(duplicateLineCount,projectLoc)>%)");
+	//println(getMethodSizeSummary(project));
+	//println();
+	//println(getCyclomaticComplexitySummary(project));
+	//println();
+	//duplicateLineCount = getTotalDuplicatedLines(project);
+	//println("Duplicate lines (6+) Total: <duplicateLineCount> (<percent(duplicateLineCount,projectLoc)>%)");
 	endTime = now();
 	timeTaken = endTime - startTime;
 	println("time taken: <timeTaken.minutes>:<timeTaken.seconds>");

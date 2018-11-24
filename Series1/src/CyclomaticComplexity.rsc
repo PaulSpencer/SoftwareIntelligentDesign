@@ -8,9 +8,8 @@ public loc hsqldbProject = |project://hsqldb-2.3.1|;
 
 public rel[loc, int]  calculateComplexityForProject(loc project){
   rel[loc, int] metrics = {};
-  locations = [ file | file <- files(createM3FromEclipseProject(project))];
-  for(location <- locations){
-    metrics += calculateComplexity(location);
+  for(metric <- [ calculateComplexity(file) | file <- files(createM3FromEclipseProject(project))]){
+    metrics +=metric;
   }
   
   return metrics;
