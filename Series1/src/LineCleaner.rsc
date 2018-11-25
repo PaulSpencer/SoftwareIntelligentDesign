@@ -6,8 +6,16 @@ import List;
 import String;
 
 set[list[tuple[loc, str]]] getCleanedFileLinesForProject(loc project) {
-	return {lines <- [<lineLocation, text>  | getCleanedLinesForFile(file) <- files(createM3FromEclipseProject(project)), text != ""]};
+	fileLines = {};
+    for (file <- files(createM3FromEclipseProject(project))) {
+    	lines = getCleanedLinesForFile(file);
+    	lines = [<lineLocation, text> | <lineLocation, text> <- lines, text != ""];
+		fileLines += {lines};
+	}
+	
+	return fileLines;
 }
+
 
 list[tuple[loc, str]] getCleanedLinesForFile(loc file) {
 	lines = [];
