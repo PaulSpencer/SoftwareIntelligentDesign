@@ -16,12 +16,12 @@ public void displayMetricsForProject(loc project){
 	startTime = now();
 	println("For the project <project.authority> we have the following metrics:");
 	println();
-	projectLoc = countLinesPerProject(project);
-	println("Volume (total Lines of Code) : <projectLoc>");
-	println();
+	//projectLoc = countLinesPerProject(project);
+	//println("Volume (total Lines of Code) : <projectLoc>");
+	//println();
 	//println(getMethodSizeSummary(project));
 	//println();
-	//println(getCyclomaticComplexitySummary(project));
+	println(getCyclomaticComplexitySummary(project));
 	//println();
 	//duplicateLineCount = getTotalDuplicatedLines(project);
 	//println("Duplicate lines (6+) Total: <duplicateLineCount> (<percent(duplicateLineCount,projectLoc)>%)");
@@ -57,32 +57,22 @@ str summaryCCLine(str key, str description, map [str, int] distribution) {
 map [str, int] getCyclomaticComplexityDistribution(rel[loc, int] methodsWithCyclomaticComplexity){
 	map [str, int] methodDistribution = ("low":0,"moderate":0,"high":0,"very high":0);	
 	
-	simpleRange = [1 .. 6];
-	moreComplexRange = [6 .. 8];
-	complexRange = [8 .. 14];
-	allRanges = simpleRange + moreComplexRange + complexRange;
-	
 	for(methodWithCyclomaticComplexity <-methodsWithCyclomaticComplexity){
 		<_, methodCyclomaticComplexity> = methodWithCyclomaticComplexity;
 		
-		if(methodCyclomaticComplexity in simpleRange){
-			methodDistribution["low"] += 1;
-		}
-		
-		if(methodCyclomaticComplexity in moreComplexRange){
-			methodDistribution["moderate"] += 1;
-		}
-		
-		if(methodCyclomaticComplexity in complexRange){
-			methodDistribution["high"] += 1;
-		}
-		
-		if(methodCyclomaticComplexity notin allRanges){
-			methodDistribution["very high"] += 1;
-		}
+		methodDistribution[getCCCategory(methodCyclomaticComplexity)] += methodCyclomaticComplexity;
 	} 
 	
+	println("<methodDistribution>");
+	
 	return methodDistribution;
+}
+
+str getCCCategory(int complexity) {
+	if(complexity <= 6) return "low";
+	if(complexity <= 8)	return "moderate";
+	if(complexity <= 14) return "high";
+	return "very high";
 }
 
 public str getMethodSizeSummary(loc project){
