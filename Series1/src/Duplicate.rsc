@@ -17,106 +17,45 @@ public loc hsqldbProject = |project://hsqldb-2.3.1|;
 
 public str uniqueLineSeperator = "\n \b";
 
+public rel[loc,loc] findDuplicates(loc project) {
+	fileLines = getCleanedFileLinesForProject(project);
+	dups = getDuplicatesFromLines(fileLines);		
+	return {<l1,l2>  | <l1,l2,_> <- dups};
+}
+
 public int getTotalDuplicatedLines(loc project){
 	fileLines = getCleanedFileLinesForProject(project);
 	duplicates = getDuplicatesFromLines(fileLines); 
-	
+	duplicateGroups = groupDuplicates(duplicates);
+	return (0 | it + (numberOfLines(key) * numberOfDuplicates(duplicateGroups,key)) | key <- duplicateGroups);
+}
+
+int numberOfLines(str text) = size(findAll(text,uniqueLineSeperator)) +1; 
+int numberOfDuplicates(map[str, set[loc]] duplicateGroups, str key) = size(duplicateGroups[key])-1; 
+
+map[str, set[loc]] groupDuplicates(rel[loc, loc, str] duplicates){
 	set[loc] emptyLocSet = {};
 	map[str, set[loc]] duplicateGroups = ();
 	for (<l1,l2,key> <- duplicates) {
 		duplicateGroups[key]?emptyLocSet += {l1,l2};
 	}
-	
-	totalDuplicatedLines = 0;
-	for (key <- duplicateGroups) {
-		duplicatesInGroup = duplicateGroups[key];
-		lines = size(findAll(key,uniqueLineSeperator)) +1;
-		duplicatedLines = lines *(size(duplicatesInGroup) -1);
-		totalDuplicatedLines += duplicatedLines;
-	}
-	
-	return totalDuplicatedLines;
+	return duplicateGroups;
 }
-
-
-public rel[loc,loc] findDuplicates(loc project) {
-	fileLines = getCleanedFileLinesForProject(project);
-
-	dups = getDuplicatesFromLines(fileLines);
-	
-	map[str, set[loc]] duplicateGroups = ();
-	for (dup <- dups) {
-		<l1,l2,key> = dup;
-		if (key in duplicateGroups){
-			duplicateGroups[key] = duplicateGroups[key] + {l1,l2};
-		} else {
-			duplicateGroups += (key : {l1,l2});
-		}		
-	}
-	
-	totalDuplicate = 0;
-	totalGroupCount = 0;
-	totalGroupQty = 0;
-	for (key <- duplicateGroups){
-		totalGroupCount += 1;
-		
-		groupz = duplicateGroups[key];		
-		totalGroupQty += size(groupz);
-		lineCount = size(findAll(key,uniqueLineSeperator));
-		duplicateLineCount = lineCount *(size(groupz) -1);
-		totalDuplicate += duplicateLineCount;
-		/*
-		println();println();println();
-		println("----------------------------------------------");
-		println("the following <size(groupz)> locations are equal: ");
-		println("they each have <lineCount> lines making <duplicateLineCount> duplicate lines");
-		println("----------------------------------------------");
-		for(location <- groupz){
-			println("<location>");
-			println("...");
-			println(readFile(location));
-			println("...");
-		}
-		*/
-	}
-	
-	return {<l1,l2>  | <l1,l2,_> <- dups};
-}
-
-
 
 rel[loc, loc, str] getDuplicatesFromLines(set[list[tuple[loc, str]]] fileLines) {
 	textMap = createMapOfTextsAndLocations(fileLines);
 	duplicateLocations = extractDuplicatesFromTextMap(textMap);
-	subsetDuplicates = getSubsetLocations(textMap,duplicateLocations);
-		
+	subsetDuplicates = getSubsetDuplicateLocations(textMap,duplicateLocations);
 	return  duplicateLocations - subsetDuplicates;
 }
 
-rel[loc,loc,str] getSubsetLocations(map[str, list[loc]] textMap,rel[loc,loc,str] duplicateLocations){
-	map[str, set[str]] subsetTexts = ();
-	set[str] emptySet = {};
-	for (text <- textMap){		
-		minusFirstLine = substring(text, findFirst(text,uniqueLineSeperator)+size(uniqueLineSeperator));
-		
-		if(minusFirstLine in textMap) {
-			subsetTexts[minusFirstLine]?emptySet += {text};
-		}
+rel[loc,loc,str] getSubsetDuplicateLocations(map[str, list[loc]] textMap, rel[loc,loc,str] duplicateLocations){
+	subsetTexts = getAllSuperSetsExistingForTexts(textMap);
+	subsetLocs = getLocationsForSubSets(textMap, subsetTexts);
+	return getSubsetDuplicates(duplicateLocations,subsetLocs);
+}
 
-		minusLastLine = substring(text, 0, findLast(text,uniqueLineSeperator));
-		if(minusLastLine in textMap) {
-			subsetTexts[minusLastLine]?emptySet += {text};
-		}
-	}
-	
-	map[loc, set[tuple[loc,str]]] subsetLocs = ();
-	set[tuple[loc,str]] emptyLocSet = {};
-	for	(subsetText <- subsetTexts, supersetText <- subsetTexts[subsetText]) {
-		for (subset <- textMap[subsetText], superset <-textMap[supersetText], subset.path == superset.path && subset < superset){
-			subsetLocs[subset]?emptyLocSet += {<superset,supersetText>};
-		}
-	}
-	
+rel[loc,loc,str] getSubsetDuplicates(rel[loc,loc,str] duplicateLocations, map[loc, set[tuple[loc,str]]] subsetLocs) {
 	rel[loc,loc,str] subsetDuplicates = {};	
 	for (<l1, l2,text>  <- {<l1, l2,text>  | <l1, l2,text> <- duplicateLocations, l1 in subsetLocs && l2 in subsetLocs}) {
 
@@ -131,7 +70,36 @@ rel[loc,loc,str] getSubsetLocations(map[str, list[loc]] textMap,rel[loc,loc,str]
 	}	
 	
 	return subsetDuplicates;	
+} 
+
+map[loc, set[tuple[loc,str]]] getLocationsForSubSets(map[str, list[loc]] textMap, map[str, set[str]] subsetTexts){
+	map[loc, set[tuple[loc,str]]] subsetLocs = ();
+	set[tuple[loc,str]] emptyLocSet = {};
+	for	(subsetText <- subsetTexts, supersetText <- subsetTexts[subsetText]) {
+		for (subset <- textMap[subsetText], superset <-textMap[supersetText], subset.path == superset.path && subset < superset){
+			subsetLocs[subset]?emptyLocSet += {<superset,supersetText>};
+		}
+	}
+	return subsetLocs;
 }
+
+map[str, set[str]] getAllSuperSetsExistingForTexts(map[str, list[loc]] textMap){
+	map[str, set[str]] subsetTexts = ();
+	set[str] emptySet = {};
+	for (text <- textMap){		
+		minusFirstLine = substring(text, findFirst(text,uniqueLineSeperator)+size(uniqueLineSeperator));		
+		if(minusFirstLine in textMap) {
+			subsetTexts[minusFirstLine]?emptySet += {text};
+		}
+
+		minusLastLine = substring(text, 0, findLast(text,uniqueLineSeperator));
+		if(minusLastLine in textMap) {
+			subsetTexts[minusLastLine]?emptySet += {text};
+		}
+	}
+	return subsetTexts;
+}
+
 
 map[str, list[loc]] createMapOfTextsAndLocations(set[list[tuple[loc, str]]] fileLines){
 	map[str, list[loc]] textMap = ();
