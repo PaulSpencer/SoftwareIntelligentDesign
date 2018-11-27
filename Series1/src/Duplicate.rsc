@@ -103,21 +103,15 @@ map[str, set[str]] getAllSuperSetsExistingForTexts(map[str, list[loc]] textMap){
 
 map[str, list[loc]] createMapOfTextsAndLocations(set[list[tuple[loc, str]]] fileLines){
 	map[str, list[loc]] textMap = ();
-	blocksWithDuplicateSingleLines = breakOnUniqueLines(fileLines);
-	for (lines <-blocksWithDuplicateSingleLines){
+	list[loc] emptyLocList = [];
+	for (lines <- breakOnUniqueLines(fileLines)){
 		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line};
 			
 		for (lineLocationPair <- lineLocationPairs) {
-			<l1,l2> = lineLocationPair;
 			spanLocation = getSpan(lineLocationPair);
 			spanText = getSpanText(lines,spanLocation);
-			lineCount = size(findAll(spanText, uniqueLineSeperator));
-			if(lineCount >= 5) {
-				if (spanText in textMap) {
-					textMap[spanText] = textMap[spanText] + [spanLocation];	
-				} else {		
-					textMap += (spanText : [spanLocation]);
-				}
+			if(numberOfLines(spanText) >= 6) {
+				textMap[spanText]?emptyLocList += [spanLocation];
 			}
 		}
 	}
@@ -127,22 +121,23 @@ map[str, list[loc]] createMapOfTextsAndLocations(set[list[tuple[loc, str]]] file
 
 set[list[tuple[loc, str]]] breakOnUniqueLines(set[list[tuple[loc, str]]] fileLines) {
 	uniqueLines = getUniqueLines(fileLines);
-	returnFileLines = {};
+	fileSegments = {};
+
 	for (lines <- fileLines) {
 		fileSegment = [];
+		
 		for (<lineLoc, lineText> <- lines) {
 			if(lineText in uniqueLines) {
-				returnFileLines += {fileSegment};
+				fileSegments += {fileSegment};
 				fileSegment = [];
 			} else {				
 				fileSegment += <lineLoc, lineText>;
 			}
 		}
 		
-		returnFileLines += {fileSegment};			
+		fileSegments += {fileSegment};			
 	}
-		
-	return returnFileLines;
+	return fileSegments;
 }
 
 
@@ -159,31 +154,23 @@ set[str] getUniqueLines(set[list[tuple[loc, str]]] fileLines){
 		}	
 	}
     
-    return {text | text <- uniqueLineMap, uniqueLineMap[text] == true};
+    return {text | text <- uniqueLineMap, uniqueLineMap[text]};
 }
 
 rel[loc,loc,str] extractDuplicatesFromTextMap(map[str, list[loc]] textMap) { 	
-	duplicateTexts = (text : textMap[text] | text <- textMap, size(textMap[text]) > 1);
+	textMap = (text : textMap[text] | text <- textMap, size(textMap[text]) > 1);
 
 	rel[loc,loc,str] duplicateLocations = {};
-    for (text <- duplicateTexts) {
-    	locations = textMap[text];
-    	
-    	for (firstLoc <- locations, nextLoc <- locations, firstLoc != nextLoc) {
-    		if(<nextLoc, firstLoc,text> notin duplicateLocations) {
-    			duplicateLocations += <firstLoc, nextLoc,text>;
-    		}
+    for (text <- textMap) {
+    	for (firstLoc <- textMap[text], nextLoc <- textMap[text], firstLoc != nextLoc && <nextLoc, firstLoc,text> notin duplicateLocations) {
+    		duplicateLocations += <firstLoc, nextLoc,text>;
     	}
     }
 	
     return duplicateLocations;
 }    
 
-str getSpanText(list[tuple[loc, str]] lines, loc span) {
-	linesInSpan = [text | <line, text> <- lines, line <= span, text != ""];
-	allLines = intercalate(uniqueLineSeperator, linesInSpan);
-	return allLines;
-}
+str getSpanText(list[tuple[loc, str]] lines, loc span) = intercalate(uniqueLineSeperator, [text | <line, text> <- lines, line <= span, text != ""]);
 
 loc getSpan(tuple[loc, loc] locationPair){
 	<beginLocation, endLocation> = locationPair;
