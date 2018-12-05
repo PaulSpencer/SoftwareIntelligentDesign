@@ -17,6 +17,12 @@ public loc hsqldbProject = |project://hsqldb-2.3.1|;
 
 public str uniqueLineSeperator = "\n \b";
 
+public map[str, set[loc]] findDuplicateGroups(loc project) {
+	fileLines = getCleanedFileLinesForProject(project);
+	duplicates = getDuplicatesFromLines(fileLines); 
+	return groupDuplicates(duplicates);
+}
+
 public rel[loc,loc] findDuplicates(loc project) {
 	fileLines = getCleanedFileLinesForProject(project);
 	dups = getDuplicatesFromLines(fileLines);		
