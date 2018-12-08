@@ -17,48 +17,67 @@ public loc hsqldbProject = |project://hsqldb-2.3.1|;
 public datetime tempdate = $2010-07-15$;
 
 public str uniqueLineSeperator = "\n \b";
-public datetime versionDate;
 
-public void findDuplicates(loc project, datetime version) {
-	versionDate = version;
-	duplicateGroups = findDuplicateGroups(project);
-	writeCSV(bubbleGraphOutput(duplicateGroups, version),|file:///C:/temp/bubbleDuplicates.csv|);
+
+public void findDuplicates(list[tuple[loc,int]] versionedProjects) {
+	versionedDuplicateGroups = [<findDuplicateGroups(projectLoc),versionDate> | <projectLoc,versionDate> <-versionedProjects];
+	writeCSV(bubbleGraphOutput(versionedDuplicateGroups),|file:///C:/temp/bubbleDuplicates2.csv|);
 //	writeCSV(duplicateSnippets(duplicateGroups),|file:///C:/temp/allDuplicates.csv|);
 //	writeCSV(getAllConnections(duplicateGroups),|file:///C:/temp/allConnections.csv|);
 }
 
-
-rel[datetime versionDate, str packageName, str className, int classSize, int duplicateCount, int duplicateLines, int largestDuplicate] bubbleGraphOutput(map[str, set[loc]] duplicateGroups, datetime versionDate){
-	rel[datetime,str,str,int,int,int,int] bubbles = {};
-	
-	map[tuple[datetime,str,str],tuple[int,int,int,int]] bubbleMap = ();
-	
-	for(textKey <- duplicateGroups){
-		duplicateGroup = duplicateGroups[textKey];
+public void FindAllHsqldbDuplicates(){
+	versions = 
+		[
+		//<|project://hsqldb-svn-r50|,2007>,
+		//<|project://hsqldb-svn-r432|,2008>
+		//<|project://hsqldb-svn-r2957|,2009>,
+		<|project://hsqldb-svn-r3561|,2010>
+		//<|project://hsqldb-svn-r4171|,2011>
+		//4963 = 2012
+		//5222 = 2013
+		//5365 = 2014
+		//5454 = 2015
+		//5581 = 2016
+		//<|project://hsqldb-svn-r5734|,2017>
+		];
 		
-		for (duplicateLocation <- duplicateGroup){
-			key = <versionDate, getPackage(duplicateLocation), getClass(duplicateLocation)>;
+	findDuplicates(versions);		
+}
+
+rel[int versionDate, str packageName, str className, int classSize, int duplicateCount, int duplicateLines, int largestDuplicate] bubbleGraphOutput(list[tuple[map[str, set[loc]],int]] versionedDuplicateGroups){
+	rel[int,str,str,int,int,int,int] bubbles = {};
+	
+	map[tuple[int,str,str],tuple[int,int,int,int]] bubbleMap = ();
+	for (<duplicateGroups,versionDate> <-versionedDuplicateGroups){
+		println("<versionDate>");
+		for(textKey <- duplicateGroups){
+			duplicateGroup = duplicateGroups[textKey];
 			
-			
-			duplicateSize = size(findAll(textKey,uniqueLineSeperator));
-			
-			if(key in bubbleMap) {
-				<classSize,dulicateCount, duplicatedLineCount,largestDuplicate> = bubbleMap[key];
-				newValue = 
-					<classSize, 
-					dulicateCount+1,
-					duplicatedLineCount+duplicateSize, 
-					max(largestDuplicate,duplicateSize)>;
-				bubbleMap[key] = newValue;
-			} else {
-				classSize = getClassLines(duplicateLocation);
-				bubbleMap[key] = <classSize,1,duplicateSize,duplicateSize>;
-			}			
-		}		
+			for (duplicateLocation <- duplicateGroup){
+				key = <versionDate, getPackage(duplicateLocation), getClass(duplicateLocation)>;
+				
+				
+				duplicateSize = size(findAll(textKey,uniqueLineSeperator));
+				
+				if(key in bubbleMap) {
+					<classSize,dulicateCount, duplicatedLineCount,largestDuplicate> = bubbleMap[key];
+					newValue = 
+						<classSize, 
+						dulicateCount+1,
+						duplicatedLineCount+duplicateSize, 
+						max(largestDuplicate,duplicateSize)>;
+					bubbleMap[key] = newValue;
+				} else {
+					classSize = getClassLines(duplicateLocation);
+					bubbleMap[key] = <classSize,1,duplicateSize,duplicateSize>;
+				}			
+			}		
+		}
 	}
 	
 	for(key <- bubbleMap){
-		<_,packageName,className> = key;
+		<versionDate,packageName,className> = key;
 		<classSize, duplicateCount, duplicateLineCount, largestDuplicates> = bubbleMap[key];
 		bubbles += <versionDate, packageName, className, classSize, duplicateCount, duplicateLineCount, largestDuplicates>;
 	}
@@ -90,6 +109,8 @@ rel[loc first,str package1,str class1,loc second,str package2,str class2] getAll
 	return connections;	
 }
 
+/*
+
 rel[loc,int,str,str,str,str,datetime,set[loc]] toSnippets(map[str, set[loc]] duplicateGroups){
 	rel[loc,int,str,str,str,str,datetime,set[loc]]  snippets = {};
 	
@@ -112,6 +133,7 @@ rel[loc,int,str,str,str,str,datetime,set[loc]] toSnippets(map[str, set[loc]] dup
 	
 	return snippets;
 }
+*/
 
 str getPackage(loc location) {
 	path = location.path;
