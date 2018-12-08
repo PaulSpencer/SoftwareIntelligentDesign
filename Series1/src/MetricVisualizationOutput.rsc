@@ -21,18 +21,18 @@ public str uniqueLineSeperator = "\n \b";
 
 public void findDuplicates(list[tuple[loc,int]] versionedProjects) {
 	versionedDuplicateGroups = [<findDuplicateGroups(projectLoc),versionDate> | <projectLoc,versionDate> <-versionedProjects];
-	writeCSV(bubbleGraphOutput(versionedDuplicateGroups),|file:///C:/temp/bubbleDuplicates2.csv|);
+//	writeCSV(bubbleGraphOutput(versionedDuplicateGroups),|file:///C:/temp/bubbleDuplicates2.csv|);
 //	writeCSV(duplicateSnippets(duplicateGroups),|file:///C:/temp/allDuplicates.csv|);
-//	writeCSV(getAllConnections(duplicateGroups),|file:///C:/temp/allConnections.csv|);
+	writeCSV(getAllConnections(versionedDuplicateGroups),|file:///C:/temp/allConnections.csv|);
 }
 
 public void FindAllHsqldbDuplicates(){
 	versions = 
 		[
-		//<|project://hsqldb-svn-r50|,2007>,
-		//<|project://hsqldb-svn-r432|,2008>
+		<|project://hsqldb-svn-r50|,2007>,
+		<|project://hsqldb-svn-r432|,2008>
 		//<|project://hsqldb-svn-r2957|,2009>,
-		<|project://hsqldb-svn-r3561|,2010>
+		//<|project://hsqldb-svn-r3561|,2010>
 		//<|project://hsqldb-svn-r4171|,2011>
 		//4963 = 2012
 		//5222 = 2013
@@ -44,6 +44,7 @@ public void FindAllHsqldbDuplicates(){
 		
 	findDuplicates(versions);		
 }
+
 
 rel[int versionDate, str packageName, str className, int classSize, int duplicateCount, int duplicateLines, int largestDuplicate] bubbleGraphOutput(list[tuple[map[str, set[loc]],int]] versionedDuplicateGroups){
 	rel[int,str,str,int,int,int,int] bubbles = {};
@@ -89,23 +90,26 @@ int getClassLines(loc snippetLocation){
 	return countLinesPerFile(toLocation(snippetLocation.uri));
 }
 
-rel[loc first,str package1,str class1,loc second,str package2,str class2] getAllConnections(map[str, set[loc]] duplicateGroups){
-	rel[loc,str,str,loc,str,str] connections = {};
-	
-	for(textKey <- duplicateGroups){
-		duplicateGroup = duplicateGroups[textKey];
-		for (first <- duplicateGroup, second <-duplicateGroup, first != second && first.path != second.path){
-			connections +=
-			    <first,
-				getPackage(first),
-				getClass(first),
-				second,
-				getPackage(second),
-				getClass(second)
-			>;
+rel[int year, str originPackage, str originClass, loc originLocation, str destPackage, str destClass, loc destLocation, int duplicateSize] getAllConnections(list[tuple[map[str, set[loc]],int]] versionedDuplicateGroups){
+	rel[int,str,str,loc,str,str,loc,int] connections = {};
+	for (<duplicateGroups,versionDate> <-versionedDuplicateGroups){
+		println("<versionDate>");	
+		for(textKey <- duplicateGroups){
+			duplicateGroup = duplicateGroups[textKey];
+			duplicateSize = size(findAll(textKey,uniqueLineSeperator));
+			for (first <- duplicateGroup, second <-duplicateGroup, first != second && first.path != second.path){
+				connections +=
+				    <versionDate,
+				    getPackage(first),
+					getClass(first),
+					first,
+					getPackage(second),
+					getClass(second),
+					second,
+					duplicateSize>;
+			}
 		}
 	}
-	
 	return connections;	
 }
 

@@ -498,3 +498,5 @@ versionDate,packageName,className,classSize,duplicateCount,duplicateLines,larges
 2008,base.trunk.src.org.hsqldb.util.preprocessor,Defines,125,2,14,7
 2007,base.trunk.src.org.hsqldb.jdbc,jdbcDataSource,83,5,35,9
 2007,base.trunk.src.org.hsqldb.dbinfo,DITypeInfo,607,15,86,14
+2007,base.trunk.src.org.hsqldb.cmdline,Dummy,0,0,0,0
+2007,base.trunk.src.org.hsqldb.cmdline.sqltool,Dummy,0,0,0,0
