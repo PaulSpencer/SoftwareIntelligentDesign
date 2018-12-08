@@ -15,6 +15,14 @@ public map[str, int] calculate(loc project) {
     fqn = replaceAll(location.path,"/",".");
     fqn = replaceFirst(fqn,".","");
     metric[fqn] ? 0 += 1;
+    metric = calculateMethodComplexity(metric,fqn,impl);
+  }
+  writeMapToCsv(metric);
+  
+  return metric;
+}
+
+public map[str,int] calculateMethodComplexity(map[str,int] metric, str fqn, Statement impl){
     visit (impl) {
       case \if(_,_) : metric[fqn] ? 0 += 1;
       case \if(_,_,_) : metric[fqn] ? 0 += 1; // why is thsi 1 not 2
@@ -26,12 +34,9 @@ public map[str, int] calculate(loc project) {
       case \do(_,_) : metric[fqn] ? 0 += 1; // is this already covered by while?
       case \foreach(_,_,_) : metric[fqn] ? 0 += 1; 
       case \catch(_,_): metric[fqn] ? 0 += 1; //  why is this being called 300+ times
-      case \expressionStatement(Expression stmt) : metric[fqn] ? 0 += getAndsAndOrs(stmt);
+	  case \conditional(_,_,_) : metric[fqn] ? 0 += 1; 
     }
-  }
-  writeMapToCsv(metric);
-  
-  return metric;
+    return metric;
 }
 
 public int emptyExpression(Expression exp) {
@@ -48,11 +53,11 @@ public int emptyExpression(Expression exp) {
 
 public int getAndsAndOrs(Expression stmt) {
   ops = 0;
-  
+  println("got here");
   visit (stmt) {
     case \infix(_,str operator,_) : println(operator); // ops += operator == "|" ? 1 : 0;
   }
-  return ops;
+  return 3;
 }
 
 public loc hwl = |project://first|;
@@ -67,6 +72,34 @@ public void writeMapToCsv(map[str, int] forOutput) {
 rel[str methodName, int metric] mapToRel(map[str, int] metrics)
    = { <metric, metrics[metric]> | metric <- metrics};
    
+public bool tests(){
+  return firstTest() && secondTest();
+}
    
 public loc firstTestLocation = |project://someTests/src/someTests/firstTest.java|;
-public bool firstTest = 
+public bool firstTest(){
+  metric = ();
+  for(/method(_, _, _, _, Statement impl, decl=location) := createAstsFromEclipseProject(firstTestLocation, true)){
+    fqn = replaceAll(location.path,"/",".");
+    fqn = replaceFirst(fqn,".","");
+    
+    metric[fqn] ? 0 += 1;
+    metric = calculateMethodComplexity(metric,fqn,impl);
+  }
+  println( metric["someTests.firstTest.getScale()"] );
+  return metric["someTests.firstTest.getScale()"] == 3;
+}
+  
+public loc secondTestLocation = |project://someTests/src/someTests/secondTest.java|;
+public bool secondTest(){
+  metric = ();
+  for(/method(_, _, _, _, Statement impl, decl=location) := createAstsFromEclipseProject(firstTestLocation, true)){
+    fqn = replaceAll(location.path,"/",".");
+    fqn = replaceFirst(fqn,".","");
+    
+    metric[fqn] ? 0 += 1;
+    metric = calculateMethodComplexity(metric,fqn,impl);
+  }
+  println( metric["someTests.secondTests.getFlag()"] );
+  return metric["someTests.secondTests.getFlag()"] == 4;
+}
