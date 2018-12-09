@@ -21,25 +21,28 @@ public str uniqueLineSeperator = "\n \b";
 
 public void findDuplicates(list[tuple[loc,int]] versionedProjects) {
 	versionedDuplicateGroups = [<findDuplicateGroups(projectLoc),versionDate> | <projectLoc,versionDate> <-versionedProjects];
-//	writeCSV(bubbleGraphOutput(versionedDuplicateGroups),|file:///C:/temp/bubbleDuplicates2.csv|);
-//	writeCSV(duplicateSnippets(duplicateGroups),|file:///C:/temp/allDuplicates.csv|);
-	writeCSV(getAllConnections(versionedDuplicateGroups),|file:///C:/temp/allConnections.csv|);
+	writeCSV(bubbleGraphOutput(versionedDuplicateGroups),|file:///C:/temp/bubbleDuplicates4.csv|);
+
+    <classNames, connections, fulltext>  = getAllConnections(versionedDuplicateGroups);
+    writeCSV(sort(classNames,bool(tuple[int,int,str,str] a, tuple[int,int,str,str] b){<a1,_,_,_> = a; <b1,_,_,_> = b; return a1 < b1;}), |file:///C:/temp/classnames.csv|);
+	writeCSV(connections,|file:///C:/temp/connections.csv|);
+	writeCSV(fulltext,|file:///C:/temp/fulltext.csv|);
 }
 
 public void FindAllHsqldbDuplicates(){
 	versions = 
 		[
 		<|project://hsqldb-svn-r50|,2007>,
-		<|project://hsqldb-svn-r432|,2008>
-		//<|project://hsqldb-svn-r2957|,2009>,
-		//<|project://hsqldb-svn-r3561|,2010>
-		//<|project://hsqldb-svn-r4171|,2011>
-		//4963 = 2012
-		//5222 = 2013
-		//5365 = 2014
-		//5454 = 2015
-		//5581 = 2016
-		//<|project://hsqldb-svn-r5734|,2017>
+		<|project://hsqldb-svn-r432|,2008>,
+		<|project://hsqldb-svn-r2957|,2009>,
+		<|project://hsqldb-svn-r3561|,2010>, 
+		<|project://hsqldb-svn-r4171|,2011>,// not sure why slow
+		<|project://hsqldb-svn-r4963|,2012>,//4963 = 2012
+		<|project://hsqldb-svn-r5222|,2013>,//5222 = 2013
+		<|project://hsqldb-svn-r5365|,2014>,//5365 = 2014
+		<|project://hsqldb-svn-r5454|,2015>,//5454 = 2015
+		<|project://hsqldb-svn-r5581|,2016>,//5581 = 2016
+		<|project://hsqldb-svn-r5734|,2017>
 		];
 		
 	findDuplicates(versions);		
@@ -90,7 +93,11 @@ int getClassLines(loc snippetLocation){
 	return countLinesPerFile(toLocation(snippetLocation.uri));
 }
 
-rel[int year, str originPackage, str originClass, loc originLocation, str destPackage, str destClass, loc destLocation, int duplicateSize] getAllConnections(list[tuple[map[str, set[loc]],int]] versionedDuplicateGroups){
+tuple[
+	rel[int index, int year, str package, str class],
+	rel[int source, int target, loc originLocation, loc destLocation, int duplicateSize],
+	rel[int version, loc location, str text]] getAllConnections(list[tuple[map[str, set[loc]],int]] versionedDuplicateGroups){
+	
 	rel[int,str,str,loc,str,str,loc,int] connections = {};
 	for (<duplicateGroups,versionDate> <-versionedDuplicateGroups){
 		println("<versionDate>");	
@@ -110,7 +117,26 @@ rel[int year, str originPackage, str originClass, loc originLocation, str destPa
 			}
 		}
 	}
-	return connections;	
+	
+	int index = 0;
+	uniqueClasses = { <versionDate, package, class> | <versionDate, package, class, _,_,_,_,_> <-connections};
+	rel[int,int,str,str] orderedClasses = {}; 
+	for	(<versionDate, package, class> <- uniqueClasses) {
+		orderedClasses += <index, versionDate, package, class>;
+		index += 1;
+	}
+	
+	rel[int,int,loc,loc,int] outputConnection = {};
+	for (<d,p1,c1,l1,p2,c2,l2,ds> <- connections) {
+		source = getOneFrom({i | <i,od,op,oc> <- orderedClasses, od == d && op == p1 &&  oc == c1});
+	 	target = getOneFrom({i | <i,od,op,oc> <- orderedClasses, od == d && op == p2 &&  oc == c2});
+
+		outputConnection += <source,target,l1,l2,ds>;
+	}
+	
+	fullText = {<d,l,readFile(l)> | <d,_,_,l,_,_,_,_> <-connections};
+	
+	return <orderedClasses, outputConnection, fullText>;	
 }
 
 /*

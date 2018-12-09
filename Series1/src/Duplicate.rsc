@@ -52,9 +52,15 @@ map[str, set[loc]] groupDuplicates(rel[loc, loc, str] duplicates){
 }
 
 rel[loc, loc, str] getDuplicatesFromLines(set[list[tuple[loc, str]]] fileLines) {
+	println("get TextMap");
 	textMap = createMapOfTextsAndLocations(fileLines);
+	println("textMap = <size(textMap)>");
+	println("get duplicateLocations");
 	duplicateLocations = extractDuplicatesFromTextMap(textMap);
+	println("duplicateLocations = <size(duplicateLocations)>");
+	println("get subsetDuplicates");
 	subsetDuplicates = getSubsetDuplicateLocations(textMap,duplicateLocations);
+	println("subsetDuplicates = <size(subsetDuplicates)>");
 	return  duplicateLocations - subsetDuplicates;
 }
 
@@ -114,6 +120,11 @@ map[str, list[loc]] createMapOfTextsAndLocations(set[list[tuple[loc, str]]] file
 	map[str, list[loc]] textMap = ();
 	list[loc] emptyLocList = [];
 	for (lines <- breakOnUniqueLines(fileLines)){
+		if(size(lines) > 100) {
+			println("file segment size <size(lines)>");
+			line = head(lines);
+			println("<line>");
+		}
 		lineLocationPairs = {<l1,l2> | <l1,_> <- lines, <l2,_> <- lines, (l1.begin.line +5) <= l2.begin.line};
 			
 		for (lineLocationPair <- lineLocationPairs) {
