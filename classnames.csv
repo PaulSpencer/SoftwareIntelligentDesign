@@ -1,4 +1,4 @@
-index,year,package,class,direction
+index,year,package,className,direction
 0,2007,base.trunk.src.org.hsqldb.rowio,RowOutputTextLog,From
 1,2007,base.trunk.src.org.hsqldb.rowio,RowOutputTextLog,To
 2,2007,base.trunk.src.org.hsqldb.util,DatabaseManager,From
