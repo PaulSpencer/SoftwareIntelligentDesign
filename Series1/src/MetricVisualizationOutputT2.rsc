@@ -1,4 +1,4 @@
-module MetricVisualizationOutput
+module MetricVisualizationOutputT2
 
 import lang::java::jdt::m3::Core; 
 import IO;
@@ -7,8 +7,8 @@ import List;
 import Set;
 import DateTime;
 import lang::csv::IO;
-import LineCleaner;
-import Duplicate;
+import LineCleanerT2;
+import DuplicateT2;
 import LinesOfCodePer;
 import util::Math;
 
@@ -19,25 +19,26 @@ public datetime tempdate = $2010-07-15$;
 public str uniqueLineSeperator = "\n \b";
 
 
-public void findDuplicates(list[tuple[loc,int]] versionedProjects) {
-	versionedDuplicateGroups = [<findDuplicateGroups(projectLoc),versionDate> | <projectLoc,versionDate> <-versionedProjects];
-	writeCSV(bubbleGraphOutput(versionedDuplicateGroups),|file:///C:/temp/bubbleDuplicates4.csv|);
+public void findDuplicatesT2(list[tuple[loc,int]] versionedProjects) {
+	versionedDuplicateGroups = [<findDuplicateGroupsT2(projectLoc),versionDate> | <projectLoc,versionDate> <-versionedProjects];
+	writeCSV(bubbleGraphOutputT2(versionedDuplicateGroups),|file:///C:/temp/bubbleDuplicates4.csv|);
 
-    <classNames, connections, fulltext>  = getAllConnections(versionedDuplicateGroups);
+    <classNames, connections, fulltext>  = getAllConnectionsT2(versionedDuplicateGroups);
     writeCSV(sort(classNames,bool(tuple[int,int,str,str,str] a, tuple[int,int,str,str,str] b){<a1,_,_,_,_> = a; <b1,_,_,_,_> = b; return a1 < b1;}), |file:///C:/temp/classnames.csv|);
 	writeCSV(connections,|file:///C:/temp/connections.csv|);
 	writeCSV(fulltext,|file:///C:/temp/fulltext.csv|);
 }
 
-public void FindAllHsqldbDuplicates(){
+public void FindAllHsqldbDuplicatesT2(){
 	versions = 
 		[
-		<|project://hsqldb-svn-r50|,2007>,
-		<|project://hsqldb-svn-r432|,2008>,
-		<|project://hsqldb-svn-r2957|,2009>,
-		<|project://hsqldb-svn-r3561|,2010>, 
-		<|project://hsqldb-svn-r4171|,2011>
-		//<|project://hsqldb-svn-r4963|,2012>,//4963 = 2012
+		<|project://smallsql0.21_src|,1999>
+		//<|project://hsqldb-svn-r50|,2007>
+		//<|project://hsqldb-svn-r432|,2008>,
+		//<|project://hsqldb-svn-r2957|,2009>,
+		//<|project://hsqldb-svn-r3561|,2010>, 
+		//<|project://hsqldb-svn-r4171|,2011>
+		//<|project://hsqldb-svn-r4963|,2012>//4963 = 2012
 		//<|project://hsqldb-svn-r5222|,2013>,//5222 = 2013
 		//<|project://hsqldb-svn-r5365|,2014>,//5365 = 2014
 		//<|project://hsqldb-svn-r5454|,2015>,//5454 = 2015
@@ -45,11 +46,11 @@ public void FindAllHsqldbDuplicates(){
 		//<|project://hsqldb-svn-r5734|,2017>
 		];
 		
-	findDuplicates(versions);		
+	findDuplicatesT2(versions);		
 }
 
 
-rel[int versionDate, str packageName, str className, int classSize, int duplicateCount, int duplicateLines, int largestDuplicate] bubbleGraphOutput(list[tuple[map[str, set[loc]],int]] versionedDuplicateGroups){
+rel[int versionDate, str packageName, str className, int classSize, int duplicateCount, int duplicateLines, int largestDuplicate] bubbleGraphOutputT2(list[tuple[map[str, set[loc]],int]] versionedDuplicateGroups){
 	rel[int,str,str,int,int,int,int] bubbles = {};
 	
 	map[tuple[int,str,str],tuple[int,int,int,int]] bubbleMap = ();
@@ -59,7 +60,7 @@ rel[int versionDate, str packageName, str className, int classSize, int duplicat
 			duplicateGroup = duplicateGroups[textKey];
 			
 			for (duplicateLocation <- duplicateGroup){
-				key = <versionDate, getPackage(duplicateLocation), getClass(duplicateLocation)>;
+				key = <versionDate, getPackageT2(duplicateLocation), getClassT2(duplicateLocation)>;
 				
 				
 				duplicateSize = size(findAll(textKey,uniqueLineSeperator));
@@ -73,7 +74,7 @@ rel[int versionDate, str packageName, str className, int classSize, int duplicat
 						max(largestDuplicate,duplicateSize)>;
 					bubbleMap[key] = newValue;
 				} else {
-					classSize = getClassLines(duplicateLocation);
+					classSize = getClassLinesT2(duplicateLocation);
 					bubbleMap[key] = <classSize,1,duplicateSize,duplicateSize>;
 				}			
 			}		
@@ -89,14 +90,14 @@ rel[int versionDate, str packageName, str className, int classSize, int duplicat
 	return bubbles;
 }
 
-int getClassLines(loc snippetLocation){
+int getClassLinesT2(loc snippetLocation){
 	return countLinesPerFile(toLocation(snippetLocation.uri));
 }
 
 tuple[
 	rel[int index, int year, str package, str class, str direction],
 	rel[int source, int target, loc originLocation, loc destLocation, int duplicateSize],
-	rel[int version, loc location, str text]] getAllConnections(list[tuple[map[str, set[loc]],int]] versionedDuplicateGroups){
+	rel[int version, loc location, str text]] getAllConnectionsT2(list[tuple[map[str, set[loc]],int]] versionedDuplicateGroups){
 	
 	rel[int,str,str,loc,str,str,loc,int] connections = {};
 	for (<duplicateGroups,versionDate> <-versionedDuplicateGroups){
@@ -107,11 +108,11 @@ tuple[
 			for (first <- duplicateGroup, second <-duplicateGroup, first != second && first.path != second.path){
 				connections +=
 				    <versionDate,
-				    getPackage(first),
-					getClass(first),
+				    getPackageT2(first),
+					getClassT2(first),
 					first,
-					getPackage(second),
-					getClass(second),
+					getPackageT2(second),
+					getClassT2(second),
 					second,
 					duplicateSize>;
 			}
@@ -140,14 +141,14 @@ tuple[
 	return <orderedClasses, outputConnection, fullText>;	
 }
 
-str getPackage(loc location) {
+str getPackageT2(loc location) {
 	path = location.path;
 	path = substring(path,0,findLast(path,"/"));
 	path = substring(path,1);
 	path = replaceAll(path,"/",".");
 	return path;
 }
-str getClass(loc location) {
+str getClassT2(loc location) {
 	path = location.path;
 	path = substring(path,findLast(path,"/")+1);
 	path = substring(path,0,findLast(path,".java"));
@@ -155,5 +156,5 @@ str getClass(loc location) {
 	return path;
 }
 
-int numberOfLines(str text) = size(findAll(text,uniqueLineSeperator)) +1; 
+int numberOfLinesT2(str text) = size(findAll(text,uniqueLineSeperator)) +1; 
 
