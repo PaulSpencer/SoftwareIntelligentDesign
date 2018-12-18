@@ -20,6 +20,7 @@ public str uniqueLineSeperator = "\n \b";
 
 
 public void findDuplicates(list[tuple[loc,int]] versionedProjects) {
+	println("start: <now()>");
 	versionedDuplicateGroups = [<findDuplicateGroups(projectLoc),versionDate> | <projectLoc,versionDate> <-versionedProjects];
 	writeCSV(bubbleGraphOutput(versionedDuplicateGroups),|file:///C:/temp/bubbleDuplicates4.csv|);
 
@@ -27,22 +28,26 @@ public void findDuplicates(list[tuple[loc,int]] versionedProjects) {
     writeCSV(sort(classNames,bool(tuple[int,int,str,str,str] a, tuple[int,int,str,str,str] b){<a1,_,_,_,_> = a; <b1,_,_,_,_> = b; return a1 < b1;}), |file:///C:/temp/classnames.csv|);
 	writeCSV(connections,|file:///C:/temp/connections.csv|);
 	writeCSV(fulltext,|file:///C:/temp/fulltext.csv|);
+	println("end: <now()>");
 }
 
 public void FindAllHsqldbDuplicates(){
 	versions = 
 		[
-		<|project://hsqldb-svn-r50|,2007>,
-		<|project://hsqldb-svn-r432|,2008>,
-		<|project://hsqldb-svn-r2957|,2009>,
-		<|project://hsqldb-svn-r3561|,2010>, 
-		<|project://hsqldb-svn-r4171|,2011>
-		//<|project://hsqldb-svn-r4963|,2012>,//4963 = 2012
-		//<|project://hsqldb-svn-r5222|,2013>,//5222 = 2013
-		//<|project://hsqldb-svn-r5365|,2014>,//5365 = 2014
-		//<|project://hsqldb-svn-r5454|,2015>,//5454 = 2015
-		//<|project://hsqldb-svn-r5581|,2016>,//5581 = 2016
-		//<|project://hsqldb-svn-r5734|,2017>
+		//<|project://hsqldb-svn-r50|,2007>//, 
+		//<|project://hsqldb-svn-r432|,2008>,
+		//<|project://hsqldb-svn-r2957|,2009>//,
+		//<|project://hsqldb-svn-r3561|,2010>
+		//<|project://hsqldb-svn-r4171|,2011>//,
+		//<|project://hsqldb-svn-r4963%20-%20Copy|,2012>
+		//<|project://hsqldb-svn-r4963 - Copy|,2012>//,TODO//4963 = 2012
+		//<|project://hsqldb-svn-r5222|,2013>//TODO /5222 = 2013
+		//<|project://hsqldb-svn-r5365|,2014>//TODO5365 = 2014
+		//<|project://hsqldb-svn-r5454|,2015>//TODO5454 = 2015
+		//<|project://hsqldb-svn-r5581|,2016>//TODO5581 = 2016
+		<|project://hsqldb-svn-r5734|,2017>
+		
+		//<|project://hsqldb-2.3.1|,2019>
 		];
 		
 	findDuplicates(versions);		
