@@ -4,6 +4,8 @@ import lang::java::jdt::m3::Core;
 import IO;
 import List;
 import String;
+import JavaRewriter;
+import util::Math;
 
 set[list[tuple[loc, str]]] getCleanedFileLinesForProjectT2(loc project) {
 	fileLines = {};
@@ -23,11 +25,40 @@ list[tuple[loc, str]] getCleanedLinesForFileT2(loc file) {
 	linenr=0;
 	offset=0;
 	isInMultiline = false;
-	for (line <- readFileLines(file)) {
+	originalLines =  readFileLines(file);
+	t2Lines = getT2Lines(file);
+	for (<line,t2line> <- zip(t2Lines,t2Lines)) {
 		<linenr, offset, location> = getLineLocationT2(linenr, offset, file, line, eolSize);
-		<isInMultiline, line> = removeCommentsT2(isInMultiline, line);
-		line = trim(line);
-		lines += <location, line>;
+		<isInMultiline, t2line> = removeCommentsT2(isInMultiline, t2line);
+		line = trim(t2line);
+		lines += <location, t2line>;
+	}
+	return lines;
+}
+
+list[str] getT2Lines(loc file) {
+	rewritten = transcriber(file);
+	myrandom = arbInt;
+	filename = "C:/temp/rewritten" + toString(arbInt())  + ".java";
+	fileloc = |file:///| + filename;
+	writeFile(fileloc, rewritten);
+	lines = [];
+	while (size(rewritten) > 0) {
+		println("Size = <size(rewritten)>");
+		if(substring(rewritten,0,1) == "\r"){
+			rewritten = substring(rewritten,1);
+		}		
+		endOfLines = findAll(rewritten,"\n") - [quote+1 | quote <- findAll(rewritten,"\\\n")];	
+		if(size(endOfLines) == 0) {
+			lines += rewritten;
+			rewritten = "";
+		} else {
+			firstEndOfLine = head(endOfLines);
+			println("first \\\n <firstEndOfLine>");
+			lines += substring(rewritten,0,firstEndOfLine);
+			rewritten = substring(rewritten,firstEndOfLine+1);
+		}
+		//println(rewritten);
 	}
 	return lines;
 }
